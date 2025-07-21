@@ -1,0 +1,39 @@
+number,color,parity,half,third,row
+0,green,,,,
+00,green,,,,
+1,red,odd,1st half,1st third,bottom
+2,black,even,1st half,1st third,middle
+3,red,odd,1st half,1st third,top
+4,black,even,1st half,1st third,bottom
+5,red,odd,1st half,1st third,middle
+6,black,even,1st half,1st third,top
+7,red,odd,1st half,1st third,bottom
+8,black,even,1st half,1st third,middle
+9,red,odd,1st half,1st third,top
+10,black,even,1st half,1st third,bottom
+11,black,odd,1st half,1st third,middle
+12,red,even,1st half,1st third,top
+13,black,odd,1st half,2nd third,bottom
+14,red,even,1st half,2nd third,middle
+15,black,odd,1st half,2nd third,top
+16,red,even,1st half,2nd third,bottom
+17,black,odd,1st half,2nd third,middle
+18,red,even,1st half,2nd third,top
+19,red,odd,2nd half,2nd third,bottom
+20,black,even,2nd half,2nd third,middle
+21,red,odd,2nd half,2nd third,top
+22,black,even,2nd half,2nd third,bottom
+23,red,odd,2nd half,2nd third,middle
+24,black,even,2nd half,2nd third,top
+25,red,odd,2nd half,3rd third,bottom
+26,black,even,2nd half,3rd third,middle
+27,red,odd,2nd half,3rd third,top
+28,black,even,2nd half,3rd third,bottom
+29,black,odd,2nd half,3rd third,middle
+30,red,even,2nd half,3rd third,top
+31,black,odd,2nd half,3rd third,bottom
+32,red,even,2nd half,3rd third,middle
+33,black,odd,2nd half,3rd third,top
+34,red,even,2nd half,3rd third,bottom
+35,black,odd,2nd half,3rd third,middle
+36,red,even,2nd half,3rd third,top
