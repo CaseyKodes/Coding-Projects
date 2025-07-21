@@ -404,8 +404,7 @@ class Deck():
             wilds[hand] = wild
 
         #getting the exact number of each rank card in the first and last hand
-        # this is the most helpful for hands that need 5 cards it does not do much use otherwise but still worth keeping
-        if self.short:
+        if self.short: # if we have a short deck dont use 2-5
             ranknums = [{'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0},
                     {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}]
         else:
@@ -417,6 +416,7 @@ class Deck():
             ranknums[-1][card.getVal()]+=1 
         counts1 = [value for value in ranknums[0].values()]
         counts2 = [value for value in ranknums[-1].values()] 
+        # we reverse the count so we now that the order of the cards goes from highest ranked card to lowest ranked card
         counts1.reverse()
         counts2.reverse()
 
@@ -515,7 +515,7 @@ class Deck():
                                     elif highspot1<highspot2:
                                         hands.pop(-1)
                                         return hands
-                    # if we got here we know the hands are only 4 cards long 
+                    # if we got here we know the hands are  <=4 cards long 
                     # so we need to check the lengths of the hands now
                     if len(fullHand[0])>len(fullHand[-1]):
                         hands.pop(-1)
@@ -546,6 +546,16 @@ class Deck():
                     if pairspot1 == pairspot2:
                         counts1.pop(pairspot1)
                         counts2.pop(pairspot2)
+                        #if they have equal pairs for both we should check if one has a longer length than the other right away
+                        if len(fullHand[0]) < 5 or len(fullHand[-1]) < 5:
+                            if len(fullHand[0])>len(fullHand[-1]):
+                                hands.pop(-1)
+                                return hands
+                            elif len(fullHand[0])<len(fullHand[-1]):
+                                while len(hands)>1:
+                                    hands.pop(0)
+                                return hands
+                            else: return hands
                         for high1 in range(len(counts1)):
                             if counts1[high1]!=0:
                                 for high2 in range(len(counts2)):
@@ -559,16 +569,6 @@ class Deck():
                                         elif high1<high2:
                                             hands.pop(-1)
                                             return hands
-                        # if we got here we know the hands are only 4 cards long so we need to check the lengths of the hands now
-                        if len(counts1)>len(counts2):
-                            hands.pop(-1)
-                            return hands
-                        elif len(counts1)<len(counts2):
-                            while len(hands)>1:
-                                hands.pop(0)
-                            return hands
-                        else:
-                            return hands
                     elif pairspot1>pairspot2:
                         while len(hands)>1:
                             hands.pop(0)
@@ -930,8 +930,9 @@ def game():
                 print(f'Round {round}')
                 simPrint(org)
             elif printStyle[0] == 'n' and handsAtaTime>100:
-                if any(round-handsplayed == x*handsAtaTime/10 for x in [1,2,3,4,5,6,7,8,9,10]):
-                    print(f'{part*10}% of hands dealt')
+                oneto100 = [i for i in range(1,101)]
+                if any(round-handsplayed == x*handsAtaTime/100 for x in oneto100):
+                    print(f'{part}% of hands dealt')
                     part+=1
         handsplayed+=handsAtaTime
 
