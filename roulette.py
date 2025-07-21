@@ -54,17 +54,16 @@ def play():
             print(f"Must input a number less than {startingB}.")
             continue
         placedBet = ''
-        betType = int(input(f'Choose the type of bet you want to make. Balance is currently {startingB}\
-                            \noptions are \
-                            \n\t 1 - black or red pay 1:1\
-                            \n\t 2 - even or odd pay 1:1\
-                            \n\t 3 - 1-18 19-36 pay 1:1\
-                            \n\t 4 - first 12 second 12 third 12 pay 2:1\
-                            \n\t 5 - any of the rows pays 2:1 \
-                            \n\t\t   row 1 = 1,4,5,10,13,16,19,22,25,28,31,34\
-                            \n\t\t   row 2 = 2,5,8,11,14,17,20,23,26,29,32,35\
-                            \n\t\t   row 3 = 3,6,9,12,15,18,21,24,27,30,33,36\
-                            \n\t 6 - any individual number pays 36:1\n'))
+        print(f'Choose the type of bet you want to make. Balance is currently {startingB}.')
+        print('Options are as follows:')
+        print('1 - Red or Black pay 1:1')
+        print('2 - Even or Odd pay 1:1')
+        print('3 - 1-18 19-36 pay 1:1')
+        print('4 - First 12 Second 12 Third 12 pay 2:1')
+        print('5 - Any of the rows pays 2:1')
+        print('\trow 1 = 1,4,5,10,13,16,19,22,25,28,31,34\n\trow 2 = 2,5,8,11,14,17,20,23,26,29,32,35\n\trow 3 = 3,6,9,12,15,18,21,24,27,30,33,36')
+        print('6 - any individual number pays 36:1')
+        betType = int(input('Choice here: '))
         choices = [1,2,3,4,5,6]
         if betType not in choices:
             print('Not a valid selection.')
@@ -73,7 +72,7 @@ def play():
             match betType:
                 case 1:
                     RB = True
-                    placedBet = input('1 for Red or 2 for black?\n')
+                    placedBet = input('1 -> Red or 2 -> Black? ')
                     placedBet.lower()
                     if placedBet!='1' and placedBet!='2':
                         print('Not a valid selection.')
@@ -83,7 +82,7 @@ def play():
                     break
                 case 2:
                     EO = True
-                    placedBet = input('1 for Even or 2 for Odd?\n')
+                    placedBet = input('1 -> Even or 2 -> Odd? ')
                     placedBet.lower()
                     if placedBet!='1' and placedBet!='2':
                         print('Not a valid selection.')
@@ -93,7 +92,7 @@ def play():
                     break
                 case 3:
                     HALVES = True
-                    placedBet = (input('1 for 1-18 or 2 for 19-36?\n'))
+                    placedBet = (input('1 -> 1-18 or 2 -> 19-36? '))
                     if placedBet!='1' and placedBet!='2':
                         print('Not a valid selection.')
                         continue
@@ -102,7 +101,7 @@ def play():
                     break
                 case 4:
                     THIRDS = True
-                    placedBet = (input('1 for 1-12 or 2 for 13-24 or 3 for 25-36?\n'))
+                    placedBet = (input('1 -> 1-12 or 2 -> 13-24 or 3 -> 25-36? '))
                     if placedBet!='1' and placedBet!='2' and placedBet!='3':
                         print('Not a valid selection.')
                         continue
@@ -112,10 +111,10 @@ def play():
                     break
                 case 5:
                     ROWS = True
-                    placedBet = (input('1 for row 1 or 2 for row 2 or 3 for row 3?\n\
-                                    row 1 = 1,4,5,10,13,16,19,22,25,28,31,34\n\
-                                    row 2 = 2,5,8,11,14,17,20,23,26,29,32,35\n\
-                                    row 3 = 3,6,9,12,15,18,21,24,27,30,33,36\n'))
+                    placedBet = (input('1 -> 1,4,5,10,13,16,19,22,25,28,31,34\
+                                       \n2 -> 2,5,8,11,14,17,20,23,26,29,32,35\
+                                       \n3 -> 3,6,9,12,15,18,21,24,27,30,33,36\
+                                       \n Choice here: '))
                     if placedBet!='1' and placedBet!='2' and placedBet!='3':
                         print('Not a valid selection.')
                         continue
@@ -125,7 +124,7 @@ def play():
                     break
                 case 6:
                     SOLO = True
-                    placedBet = input('Enter the specific number you want to pick.\n')
+                    placedBet = input('Enter the specific number you want to pick. ')
                     if placedBet not in numbers:
                         print('Not a valid selection.')
                         continue
