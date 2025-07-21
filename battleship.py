@@ -3,7 +3,7 @@
 '''
 classes 
     players - 
-        used to hold player data, where tehy puth their ships, where they have attacked
+        used to hold player data, where they put their ships, where they have attacked
         has funcitons to know if a player has any ships left, to attack another player, and to print out the grids of a player
 
     difficulty -
@@ -67,14 +67,13 @@ class player():
         # in the function is where we decide where the boats are
         self.AI = isAI
         self.AIlevel = level
-        self.lastHit = [0,0]
-        self.AImoveResult = [False, False] # [if hit, hit sunk]
         self.attacks = [['-' for i in range(len(validcords))] for j in range(len(validcords))] # text here bc this is what we will show a user
         self.shipVals = [['-' for i in range(len(validcords))] for j in range(len(validcords))] # we can show a player what the other players has hit and missed
         self.ships = [[0 for i in range(len(validcords))] for j in range(len(validcords))] # numbers here bc this is what we will use for logic 
         self.turn = True
         self.shipLoactions = [[]]*len(shipLens)
         self.army = []
+        self.direct = 0
         if not self.AI:
             print(f'Grid size is {len(validcords)}x{len(validcords)}.')
         for num in shipLens:
@@ -96,64 +95,24 @@ class player():
                             direction = r.randint(1, 4)
                         else:
                             direction = int(input('What direction from the start should the ship go?\n1 - Up, 2 - Down, 3 - Right, 4 - Left. '))
-                    if startX not in validcords: 
-                        raise Exception('This is not a valid starting location.')
-                    if startY not in validcords: 
+                    if startX not in validcords or startY not in validcords: 
                         raise Exception('This is not a valid starting location.')
                     if direction not in [1, 2, 3, 4]:
                         raise Exception('This is not a valid direction.')
-                    match direction: # in each case we need to see if all the indexes in direction are unoccupided and are inbetween 1-10
-                        case 1:
-                            if (startY - num +1) not in validcords:
-                                raise Exception('Boat would go off screen.')
-                            for i in range(num):
-                                #need to check if each point the boat will be on is valid 
-                                #if it is valid we should store the coords if not we throw an error
-                                if(self.ships[startY - i][startX]):
-                                    raise Exception('Boat would go onto another boat.')
-                            # if we get out here we know that all pints the boat will be on are vlaid so now we should place the baot on those points 
-                            self.army.append(ship(num))
-                            for i in range(num):
-                                self.army[-1].setCord(startX, startY-i)
-                                self.ships[startY-i][startX] = 1
-                                self.shipVals[startY-i][startX] = 'S' 
-                            pass
-                        case 2:
-                            if (startY + num -1) not in validcords:
-                                raise Exception('Boat would go off screen try again.')
-                            for i in range(num):
-                                if(self.ships[startY + i][startX]):
-                                    raise Exception('Boat would go onto another boat.')
-                            self.army.append(ship(num))
-                            for i in range(num):
-                                self.army[-1].setCord(startX, startY+i)
-                                self.ships[startY+i][startX] = 1
-                                self.shipVals[startY+i][startX] = 'S' 
-                            pass
-                        case 3:
-                            if (startX + num -1) not in validcords:
-                                raise Exception('Boat would go off screen try again.')
-                            for i in range(num):
-                                if(self.ships[startY][startX+i]):
-                                    raise Exception('Boat would go onto another boat.')
-                            self.army.append(ship(num))
-                            for i in range(num):
-                                self.army[-1].setCord(startX+i, startY)
-                                self.ships[startY][startX+i] = 1
-                                self.shipVals[startY][startX+i] = 'S' 
-                            pass
-                        case 4:
-                            if (startX - num +1) not in validcords:
-                                raise Exception('Boat would go off screen try again.')
-                            for i in range(num):
-                                if(self.ships[startY][startX-i]):
-                                    raise Exception('Boat would go onto another boat.')
-                            self.army.append(ship(num))
-                            for i in range(num):
-                                self.army[-1].setCord(startX-i, startY)
-                                self.ships[startY][startX-i] = 1
-                                self.shipVals[startY][startX-i] = 'S' 
-                            pass
+
+                    options = [[-1, 0], [1, 0], [0, 1], [0, -1]] # list of the ways the boat can go
+                    # this is the match case block condensed using the options array
+                    if (startY+options[direction-1][0]*(num-1)) not in validcords or (startX+options[direction-1][1]*(num-1)) not in validcords:
+                        raise Exception("Boat would go off screen.")
+                    for i in range(num):
+                        if self.ships[startY+options[direction-1][0]*i][startX+options[direction-1][1]*i]:
+                            raise Exception('Boat would go onto another boat.')
+                    self.army.append(ship(num))
+                    for i in range(num):
+                        self.army[-1].setCord(startX+options[direction-1][1]*i, startY+options[direction-1][0]*i)
+                        self.ships[startY+options[direction-1][0]*i][startX+options[direction-1][1]*i] = 1
+                        self.shipVals[startY+options[direction-1][0]*i][startX+options[direction-1][1]*i] = 'S'
+
                 except Exception as e:
                     if not self.AI:
                         print(f'An error occured try again, {e}')
@@ -162,25 +121,23 @@ class player():
 
     def tryAttack(self, other, x, y):
         if self.attacks[y][x] == '-':
-            print(f'Attacking {x}, {y}.')
+            print(f'Attacking ({x}, {y}).')
             if other.ships[y][x]:
                 print('Target is a hit!')
                 self.attacks[y][x] = 'H'
                 other.shipVals[y][x] = 'H'
-                self.AImoveResult[0] = True
                 for ship in other.army:
                     for location in ship.getCords():
                         if location[0] == x and location[1] == y:
                             ship.isHit() # tells the ship is was hit
                             if (ship.isSank()): # checks if the ship was sank
-                                self.AImoveResult[1] = True
+                                pass
                 other.ships[y][x] = 0
                 return True
             else:
                 print('Target is a miss.')
                 self.attacks[y][x] = 'm'
-                other.shipVals[y][x] = 'm'
-                self.AImoveResult[0] = False
+                other.shipVals[y][x] = 'm'                
                 return False
         else:
             if not self.AI:
@@ -194,33 +151,14 @@ class player():
                 attaX = r.randint(0, validcords[-1])
                 attaY = r.randint(0, validcords[-1])
                 return [attaX, attaY]
-            case 2:
-                print('\n\nNOT YET IMLPIMENTED\n\n')
-                # smarter AI, depends on if we hit to see where to go
-                # if we sunk the ship it should go back to random guessing
-                # if we did not sink the ship is should try the four cardinal directions from the spot it hit, 
-                # when it finds that another one of those is a hit it keeps going in that direction, 
-                # if that direction ends up being a miss but the ship is not sank we need to try the exact opposite direction 
-                # we need a field to know if the last move was a hit
-                # and a field to know if the last hit sunk a ship
-                if self.AImoveResult[0] and not self.AImoveResult[1]: # second term becuase if we sunk the ship now we should not use logic to make next guess
-                    # now we need to know the coords of the last hit
-                    if self.direct not in [1,2,3,4]:
-                        # this is when we already have a direction that we know we should go
-                        self.direct = r.randint(1,4)
-                    match self.direct:
-                        case 1:
-                            return [self.lastHit[1]-1, self.lastHit[0]]
-                        case 2:
-                            return [self.lastHit[1]+1, self.lastHit[0]]
-                        case 3:
-                            return [self.lastHit[1], self.lastHit[0]-1]
-                        case 4:
-                            return [self.lastHit[1], self.lastHit[0]+1]
-                else:
-                    attaX = r.randint(0, validcords[-1])
-                    attaY = r.randint(0, validcords[-1])
-                    return [attaX, attaY]    
+            case 2:            
+                # level 2 ai should use the same techniques as a normal person
+                # if we hit a ship we should try one of the 4 cardinal directions around that hit
+                    # if that misses we try another cardinal direction until one hits
+                # when it his if we have not sunk the ship we store the hit position and go in the same direction 
+                # if we get to the end and have not sunken a ship we need to go back to the other side and try there
+                print('\nNOT YET IMPLIMENTED\n')  
+                return
 
     def stillAlive(self):
         toreturn = False
@@ -269,12 +207,11 @@ def game():
                 level = int(input('What is the computers level? '))
                 # for now only 1 bot level
                 if level not in [1]:#,2]:
-                    raise Exception("Level should be either '1'")# or '2'.")
+                    raise Exception("Level should be either '1'")# '2'.")
                 break
             except Exception as e:
                 print(f'An error occured try again, {e}')
             
-    
     # getting player ship locations
     GOON = input('Player 1\'s turn to enter boats')
     p1 = player()
@@ -288,9 +225,8 @@ def game():
         os.system('cls')
     else:
         # function for computer to place its ships
-        # probably same as normal player just have random generated numbers 
         p2 = player(True, level)
-        print('Computer has finished placing its ships.')
+        print('\n\nComputer has finished placing its ships.\n\n')
 
     playerArry = [p1, p2]
     p = 0
