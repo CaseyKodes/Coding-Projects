@@ -1,15 +1,14 @@
 # roulette
-# going to be pretty easy 
 
 ''' 
 user can place 1 bet at a time and can see if they win 
+
+there is an easter egg
 '''
 
 import random as r
 import csv
 import os
-
-
 
 numbers = ['00', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 
         '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24',
@@ -18,7 +17,7 @@ numbers = ['00', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '
 def play():
     while True:
         try: 
-            startingB = float(input("How much does the player start with? "))
+            startingB = float(input("How much does the player start with in theri balance? "))
         except:
             print("Must input a number.")
             continue
