@@ -176,7 +176,7 @@ class Shoe():
         print(player.getCards()[-1])
         print(f'Player has {player.getValue()} and is done since they doubled down.')
     
-    def split(self, player:Hand, playernum):
+    def split(self, player:Hand, playernum): # this function has a lot of repeat code from the main part of the game maybe we can refactor
         # we need to split the hand into two hands
         # but they need to belong to the same user 
         # we need to make 2 new hands one from each of the cards in the hand
