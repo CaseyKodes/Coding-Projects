@@ -17,7 +17,7 @@ numbers = ['00', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '
 def play():
     while True:
         try: 
-            startingB = float(input("How much does the player start with in theri balance? "))
+            startingB = float(input("How much does the player start with in their balance? "))
         except:
             print("Must input a number.")
             continue
