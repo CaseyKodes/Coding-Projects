@@ -134,12 +134,26 @@ def play():
         data = []
         if startingB==69 and SOLO:
             result = 1 # double 0
-        rouletteDict = {'number':[0,00,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
-                        'color':['green','green','red','black','red','black','red','black','red','black','red','black','black','red','black','red','black','red','black','red','red','black','red','black','red','black','red','black','red','black','black','red','black','red','black','red','black','red'],
-                        'parity':['null','null','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even'],
-                        'half':['null','null','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half'],
-                        'third':['null','null','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third'],
-                        'row':['null','null','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top']}
+
+        rouletteDict = {'number':['0','00',1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
+                        'color':['green','green','red','black','red','black','red','black','red','black','red','black','black','red','black'
+                                 ,'red','black','red','black','red','red','black','red','black','red','black','red','black','red','black',
+                                 'black','red','black','red','black','red','black','red'],
+                        'parity':['null','null','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even',
+                                  'odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even',
+                                  'odd','even','odd','even','odd','even'],
+                        'half':['null','null','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half',
+                                '1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half',
+                                '1st half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half',
+                                '2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half'],
+                        'third':['null','null','1st third','1st third','1st third','1st third','1st third','1st third','1st third',
+                                 '1st third','1st third','1st third','1st third','1st third','2nd third','2nd third','2nd third',
+                                 '2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third',
+                                 '2nd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third',
+                                 '3rd third','3rd third','3rd third','3rd third','3rd third'],
+                        'row':['null','null','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top',
+                               'bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle',
+                               'top','bottom','middle','top','bottom','middle','top','bottom','middle','top']}
         
         data = [rouletteDict['number'][result], rouletteDict['color'][result], rouletteDict['parity'][result], rouletteDict['half'][result], rouletteDict['third'][result], rouletteDict['row'][result]]
         print(f'Spin resulted with {data}')
