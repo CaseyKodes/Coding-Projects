@@ -114,7 +114,7 @@ def play():
                     placedBet = (input('1 -> 1,4,5,10,13,16,19,22,25,28,31,34\
                                        \n2 -> 2,5,8,11,14,17,20,23,26,29,32,35\
                                        \n3 -> 3,6,9,12,15,18,21,24,27,30,33,36\
-                                       \n Choice here: '))
+                                       \nChoice here: '))
                     if placedBet!='1' and placedBet!='2' and placedBet!='3':
                         print('Not a valid selection.')
                         continue
@@ -130,22 +130,19 @@ def play():
                         continue
                     break
         #placedBet
-        result = r.randint(1,39)
+        result = r.randint(0,37)
         data = []
         if startingB==69 and SOLO:
-            result = 2 # double 0
-
-        # user needs to input path to file here 
-        with open(r"\\midfile01\Departments\Metrology MFG\Casey Provitera\funzies\\roulette_dictionary.csv", 'r') as file:
-
-            reader = csv.reader(file)
-            i = 1
-            for row in reader:
-                if i == result:
-                    print(f'Row {i}, {row}')
-                    data = row
-                i+=1
+            result = 1 # double 0
+        rouletteDict = {'number':[0,00,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
+                        'color':['green','green','red','black','red','black','red','black','red','black','red','black','black','red','black','red','black','red','black','red','red','black','red','black','red','black','red','black','red','black','black','red','black','red','black','red','black','red'],
+                        'parity':['null','null','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even','odd','even'],
+                        'half':['null','null','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','1st half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half','2nd half'],
+                        'third':['null','null','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','1st third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third'],
+                        'row':['null','null','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top']}
         
+        data = [rouletteDict['number'][result], rouletteDict['color'][result], rouletteDict['parity'][result], rouletteDict['half'][result], rouletteDict['third'][result], rouletteDict['row'][result]]
+        print(f'Spin resulted with {data}')
         if RB: # check color
             if placedBet == str(data[1]):
                 print('Bet won')
