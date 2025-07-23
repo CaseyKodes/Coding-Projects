@@ -1,6 +1,6 @@
 number,color,parity,half,third,row
 0,green,,,,
-00,green,,,,
+0,green,,,,
 1,red,odd,1st half,1st third,bottom
 2,black,even,1st half,1st third,middle
 3,red,odd,1st half,1st third,top
