@@ -370,9 +370,9 @@ def game():
                     while True:
                         try:
                             evenMon = input(f'Does {insuredPLay+1} with Black Jack want to take even money? ')
-                            evenMon = insur.lower()
-                            evenMon = insur[0]
-                            if insur=='y' or insur=='n':
+                            evenMon = evenMon.lower()
+                            evenMon = evenMon[0]
+                            if evenMon=='y' or evenMon=='n':
                                 break
                             else: raise KeyError
                         except:
