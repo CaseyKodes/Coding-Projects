@@ -113,7 +113,7 @@ class Deck():
     # we have funcitons to deal hands to players, deal a board of shared cards, 
     # shuffle the deck ( in two different ways ), and calculate the rank of each hand
 
-    def __init__(self, wild=[], dead=[], numdecks=1, short= False): # creates a deck of 52 cards, 13 ranks and 4 suits
+    def __init__(self, wild=[], dead=[], numdecks=1, short=False, shortp=False): # creates a deck of 52 cards, 13 ranks and 4 suits
         self.deck = list()
         self.playerHands = list()
         self.boardList = []
@@ -125,7 +125,7 @@ class Deck():
         self.numBorads = int()
         self.dead = dead
         self.wild = wild
-        self.shortPrint = False
+        self.shortPrint = shortp
         self.short = short
 
         suits = ['Spades', 'Hearts', 'Clubs', 'Diamonds']
@@ -146,6 +146,10 @@ class Deck():
         return(toprint)
 
     def shuffle(self): # shuffles a deck 
+        seed = r.random() # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
+        print(f'Seed of current hand is: {seed}.')
+        r.seed(seed)
+
         shuffled = []
         while len(self.deck)>0:
             spot = r.randint(0, len(self.deck)-1)
@@ -244,7 +248,7 @@ class Deck():
                         for value in rankcount.values():
                             straightlist.append(value)
                         TruestraightLength = 5 
-                        for beg in range(len(straightlist)-TruestraightLength):
+                        for beg in range(len(straightlist)-TruestraightLength+1):
                             gaps = 0
                             for i in range(TruestraightLength):
                                 if not straightlist[beg+i]: gaps+=1
@@ -279,14 +283,13 @@ class Deck():
                 # we then check to see if the number of gaps is less than or equal to the number of wilds
                 # if it is we know we can fill all the gaps with wilds so we have a straight
                 TruestraightLength = 5 
-                for beg in range(len(straightlist)-TruestraightLength):
+                for beg in range(len(straightlist)-TruestraightLength+1):
                     if self.hr.index(hand.getRank(board))>self.hr.index('Straight'): break
                     gaps = 0
                     for i in range(TruestraightLength):
                         if not straightlist[beg+i]: gaps+=1
                     if gaps<=numwilds:
-                        if self.hr.index(hand.getRank(board)) < self.hr.index('Straight'):
-                            hand.setRank('Straight', board)
+                        hand.setRank('Straight', board)
 
                 # determining based off the number of instances of that card value what type of hand a player has
                 # this is for pairs two pairs three of a kind full house and four of a kind
@@ -908,8 +911,7 @@ def game():
         part=1
         for handnum in range(handsAtaTime):
             round+=1
-            org = Deck(wild, dead, numdecks, short=sd)
-            org.shortPrint = sp
+            org = Deck(wild, dead, numdecks, short=sd, shortp=sp)
             org.shuffle()
             org.deal(numplayers,numcards,numboards)
             org.calcHandRanks()
