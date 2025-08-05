@@ -12,6 +12,7 @@
 
 import random as r
 import sys
+import time
 
 class Rankings(): # basically just a place to hold these arrays which tell us the ordering of hands 
     HandValueOrder = ['High Card', 'Pair', 'Two Pair', 'Three of a kind', 'Straight', 'Flush', 'Full House', 'Four of a kind', 'Straight Flush', 'Five of a kind']
@@ -611,7 +612,7 @@ class Deck():
                         suitcount[card.getSuit()].append(card)
                     for number in range(wilds[hand]):
                         for key in suitcount.keys():
-                            suitcount[key].append(Card('Ace', key))
+                            suitcount[key].append(Card('Ace', key, self.shortPrint))
                             suitcount[key].sort(reverse=True)
                     maybeadd = []
                     for numSuited in suitcount.values():
@@ -777,6 +778,108 @@ def printStats(tot:dict, win:dict):
         toprint += (f'{key}: {value:.3f} ')
     print(toprint)
 
+def seedfind():
+    # this will be where we ask the user if they want to find a seed for a certain type of hand
+    while True:
+        try: 
+            seedfinder = input('Are you trying to search for a seed? ')
+            if seedfinder[0] != 'y' and seedfinder[0] != 'n': raise KeyError
+            elif seedfinder[0] == 'y': return True, sys.maxsize, True
+            elif seedfinder[0] == 'n': return False, 1, False
+        except KeyError:
+            print("Must 'y' or 'n''.")
+            continue
+        break
+
+def handData():
+    while True:
+        # getting user input
+        try: 
+            shortdeck = input('Are you playing short deck? ')
+            if shortdeck[0] != 'y' and shortdeck[0] != 'n': raise KeyError
+            elif shortdeck[0] == 'y' : sd = True; deckLength=36
+            elif shortdeck[0] == 'n' : sd = False; deckLength=52
+        except KeyError or IndexError:
+            print("Must 'y' or 'n''.")
+            continue
+        try:
+            numdecks = 1 #int(input('How many decks should there be? ')) # dont want to ask how many decks right now 
+            numboards = int(input('How many boards should be played? \n(8 Cards per board) '))
+            numplayers = int(input('How many players should there be? '))
+            numcards = int(input('How many cards should each player get? '))
+        except:
+            print("Must input a number.")
+            continue
+        if (numplayers*numcards + 8*numboards <= deckLength*numdecks):
+            break
+        else:
+            print(f'There are not enough cards in {numdecks} deck(s) for that to work enter different numbers.')
+            continue
+    return sd, numboards, numplayers, numcards, numdecks
+
+def specialcards():
+    while True:
+        try:
+            dead = input('Are there any dead cards? Seperate the values with spaces. ')
+            if len(dead)>0:
+                dead = dead.split(' ')
+                dead = [item.lower() for item in dead]
+                dead = handelInput(dead)
+                for i in range(len(dead)):
+                    if (dead[i] not in Rankings.getCrank()):
+                        raise KeyError
+        except KeyError or IndexError:
+            print("Inproper input for dead cards.")
+            continue
+        try:
+            wild = input('Are there any wild cards? Seperate the values with spaces. ')
+            if len(wild):
+                wild = wild.split(' ')
+                wild = [item.lower() for item in wild]
+                wild = handelInput(wild)
+                for i in range(len(wild)):
+                    if (wild[i] not in Rankings.getCrank()):
+                        raise KeyError
+        except KeyError or IndexError:
+            print("Inproper input for wild cards.")
+            continue
+        set1 = set(dead)
+        set2 = set(wild)
+        intersec = set1.intersection(set2)
+        if intersec:
+            print('There is at least 1 value in both dead and wild. \nPlease re-enter.')
+            continue
+        return dead, wild
+
+def printdata(find):
+    sp = False
+    printStyle = ''
+    while True:
+        if find: return sys.maxsize, printStyle, True # if we are looking for a seed we should go through as many hands as needed to find the seed
+        try:
+            handsAtaTime = int(input('How many hands should be dealt at a time? '))
+        except:
+            print("Must input a number.")
+            continue
+        try: 
+            printStyle = input('How should the hand be shown? As a simulation or no print? ')
+            printStyle = printStyle.lower()
+            if printStyle[0] != 's' and printStyle[0] != 'n':
+                raise KeyError
+            elif printStyle[0] == 's':
+                try: 
+                    compress = (input("Do you want to print the values in a compressed way? (Y or N) ")).lower()
+                    if compress[0] != 'y' and compress[0] != 'n': raise KeyError
+                    elif compress[0] == 'y' : sp = True
+                    elif compress[0] == 'n' : sp = False
+                except:
+                    print("Must 'y' or 'n''.")
+                    continue
+        except:
+            print('Enter S for simulation or N for no print.')
+            continue
+        return handsAtaTime, printStyle, sp
+
 def game():
     numhands = 0
     numrounds = 0
@@ -805,80 +908,10 @@ def game():
 
     while con != 'n':
         if changeDets == 'y':
-            # this will be where we ask the user if they want to find a seed for a certain type of hand
-            while True:
-                try: 
-                    seedfinder = input('Are you trying to search for a seed? ')
-                    if seedfinder[0] != 'y' and seedfinder[0] != 'n': raise KeyError
-                    elif seedfinder[0] == 'y': find = True; handsAtaTime = sys.maxsize
-                    elif seedfinder[0] == 'n': find = False
-                except KeyError:
-                    print("Must 'y' or 'n''.")
-                    continue
-                break
 
-            while True:
-                # getting user input
-                try: 
-                    shortdeck = input('Are you playing short deck? ')
-                    if shortdeck[0] != 'y' and shortdeck[0] != 'n': raise KeyError
-                    elif shortdeck[0] == 'y' : sd = True; deckLength=36
-                    elif shortdeck[0] == 'n' : sd = False; deckLength=52
-                except KeyError or IndexError:
-                    print("Must 'y' or 'n''.")
-                    continue
-                try:
-                    numboards = int(input('How many boards should be played? \n(8 Cards per board) '))
-                except:
-                    print("Must input a number.")
-                    continue
-                try:
-                    numplayers = int(input('How many players should there be? '))
-                except:
-                    print("Must input a number.")
-                    continue
-                try:
-                    numcards = int(input('How many cards should each player get? '))
-                except:
-                    print("Must input a number.")
-                    continue
-                if (numplayers*numcards + 8*numboards<= deckLength*numdecks):
-                    break
-                else:
-                    print(f'There are not enough cards in {numdecks} deck(s) for that to work enter different numbers.')
-
-            while True:
-                try:
-                    dead = input('Are there any dead cards? Seperate the values with spaces. ')
-                    if len(dead)>0:
-                        dead = dead.split(' ')
-                        dead = [item.lower() for item in dead]
-                        dead = handelInput(dead)
-                        for i in range(len(dead)):
-                            if (dead[i] not in Rankings.getCrank()):
-                                raise KeyError
-                except KeyError or IndexError:
-                    print("Inproper input for dead cards.")
-                    continue
-                try:
-                    wild = input('Are there any wild cards? Seperate the values with spaces. ')
-                    if len(wild):
-                        wild = wild.split(' ')
-                        wild = [item.lower() for item in wild]
-                        wild = handelInput(wild)
-                        for i in range(len(wild)):
-                            if (wild[i] not in Rankings.getCrank()):
-                                raise KeyError
-                except KeyError or IndexError:
-                    print("Inproper input for wild cards.")
-                    continue
-                set1 = set(dead)
-                set2 = set(wild)
-                intersec = set1.intersection(set2)
-                if intersec:
-                    print('There is at least 1 value in both dead and wild. \nPlease re-enter.')
-                    continue
-                break
+            find, handsAtaTime, sp, = seedfind()
+            sd, numboards, numplayers, numcards, numdecks = handData()
+            dead, wild = specialcards()
 
             while True:
                 if find:
@@ -896,35 +929,13 @@ def game():
                         continue
                 break
 
-
-            while True:
-                if find: break # if we are looking for a seed we should go through as many hands as needed to find the seed
-                try:
-                    handsAtaTime = int(input('How many hands should be dealt at a time? '))
-                except:
-                    print("Must input a number.")
-                    continue
-                try: 
-                    printStyle = input('How should the hand be shown? As a simulation or no print? ')
-                    printStyle = printStyle.lower()
-                    if printStyle[0] != 's' and printStyle[0] != 'n':
-                        raise KeyError
-                    elif printStyle[0] == 's':
-                        try: 
-                            compress = (input("Do you want to print the values in a compressed way? (Y or N) ")).lower()
-                            if compress[0] != 'y' and compress[0] != 'n': raise KeyError
-                            elif compress[0] == 'y' : sp = True
-                            elif compress[0] == 'n' : sp = False
-                        except KeyError or IndexError:
-                            print("Must 'y' or 'n''.")
-                            continue
-                except KeyError or IndexError:
-                    print('Enter S for simulation or N for no print.')
-                    continue
-                break
+            handsAtaTime, printStyle, sp = printdata(find)
         
         # simulating a round of poker
         part=1
+        start = time.time()
+        cur = start
+        interval = 10
         for handnum in range(handsAtaTime):
             round+=1
             org = Deck(wild, dead, numdecks, short=sd, shortp=sp)
@@ -945,6 +956,9 @@ def game():
 
             if find:
                 # we do not want to print unless we found our hand
+                if time.time()>cur+interval:
+                    print(f'{(time.time()-start):.4} seconds elapsed')
+                    cur+=interval
                 if Rankings.getHrank(sd)[toFind-1] in org.winningLevel:
                     print(f'\nIt took {handnum+1} hands to find the valid seed of {org.seed}')
                     simPrint(org)
