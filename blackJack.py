@@ -600,6 +600,9 @@ def game():
             shoe.players.pop(i)
 
         numplayers-=len(toremove)
+        if numplayers==0:
+            print('No more players at the table.')
+            quit()
         while True:
             if enough:
                 exit = input('Enter any character to play the next hand. \nEnter 0 to exit. ')
@@ -608,10 +611,6 @@ def game():
             else:
                 print('Shoe is empty thank you for playing.')
                 quit()
-        if numplayers==0:
-            print('No more players at the table.')
-            quit()
-        
                 
     print('Not enough cards for the number of players specified thank you for playing.')
 
