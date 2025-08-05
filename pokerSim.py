@@ -27,31 +27,27 @@ class Card():
     # card objects have a value and suit which are the defining attributes 
     # they also contain a string which is just how a card would be said or writen down
     # can directly compare cards to see which one is a higher value
-    def __init__(self, val, suit):
+    def __init__(self, val, suit, sp):
         self.Suit = suit
         self.Val = val
-        self.string = f'{self.Val} of {self.Suit} '
+        self.shortPrint = sp
         self.cr = Rankings.getCrank()
     def getVal(self):
-        return self.Val
-    def getValenum(self):
-        if self.Val == 'Ace' :
-            return '14'
-        if self.Val == 'King' :
-            return '13'
-        if self.Val == 'Queen' :
-            return '12'
-        if self.Val == 'Jack':
-            return '11'
         return self.Val
     def getSuit(self):
         return self.Suit
     def getStr(self):
-        return self.string
+        if self.shortPrint:
+            if self.getVal() == '10':
+                return f'{self.getVal()[:2]} {self.getSuit()[0]} '
+            else:
+                return f'{self.getVal()[0]} {self.getSuit()[0]} '
+        else:
+            return f'{self.Val} of {self.Suit} '
     def __str__(self):
         return self.getStr()
     def __eq__(self, other):
-        return self.getVal() == other.getVal()
+        return self.getVal() == other.getVal() and self.getSuit() == other.getSuit()
     def __ne__(self, other):
         return not ((self.getVal() == other.getVal()) and (self.getSuit() == other.getSuit()))
     def __lt__(self, other):
@@ -68,9 +64,9 @@ class Hand():
     # they also have a rank that depends on the cards in a players hand and the cards on the board 
     # rank is a list to accomodate having multiple baords 
     # we can add and remove cards from a hand, clear a hand, get and set the rank of a hand
-    def __init__(self, cards, numboards):
+    def __init__(self, cards, numboards, sp):
         self.cards = list()
-        self.shortPrint = False
+        self.shortPrint = sp
         self.rank = ['High Card']*max(numboards, 1) # default lowest value of a hand
         for card in cards:
             self.cards.append(card)
@@ -98,10 +94,7 @@ class Hand():
     def __str__(self):
         toreturn = ('Hand is: ')
         for card in self.cards:
-            if self.shortPrint:
-                toreturn += f'{card.getVal()} {card.getSuit()[0]} '
-            else:
-                toreturn += card.getStr()
+            toreturn += card.getStr()
             if card!=self.cards[-1]: toreturn+='& '
         return toreturn
     
@@ -109,7 +102,7 @@ class Deck():
     # deck objects contain 52 cards, 4 suits, and 13 values
     # it contains lists of hands that players have
     # it keeps track of the current deck after being dealt and we can save what 
-    # cards are burnt but there is no use for those yet
+    # cards are burnt (good to have if we need to test something)
     # we have funcitons to deal hands to players, deal a board of shared cards, 
     # shuffle the deck ( in two different ways ), and calculate the rank of each hand
 
@@ -134,15 +127,12 @@ class Deck():
         for deck in range(numdecks):
             for suit in suits:
                 for value in values:
-                    self.deck.append(Card(value, suit))
+                    self.deck.append(Card(value, suit, self.shortPrint))
 
     def __str__(self):
         toprint = ''
         for card in self.deck:
-            if self.shortPrint:
-                toprint += f'{card.getVal()} {card.getSuit()[0]} '
-            else:
-                toprint += card.getStr()
+            toprint += card.getStr()
         return(toprint)
 
     def shuffle(self): # shuffles a deck 
@@ -177,9 +167,7 @@ class Deck():
                 if player < len(self.playerHands):
                     self.playerHands[player].addCard(self.deck.pop(0))
                 else:
-                    self.playerHands.append(Hand([self.deck.pop(0)], numboards))
-        self.numBorads = numboards
-        for hand in self.playerHands: hand.shortPrint = self.shortPrint
+                    self.playerHands.append(Hand([self.deck.pop(0)], numboards, self.shortPrint))
         self.dealboards(numboards)
                 
     def dealboards(self, numB):
@@ -360,18 +348,12 @@ class Deck():
                 if len(self.boardList)>0:
                     for b in self.boardList[boardIndex]:
                         for card in b:
-                            if self.shortPrint:
-                                toreturn += f'{card.getVal()} {card.getSuit()[0]} '
-                            else:
-                                toreturn += card.getStr()
+                            toreturn += card.getStr()
                             if card != b[-1]: toreturn +='& '
             toreturn += '\nWith a hand of: \n'
             for hand in winnershand:
                 for card in hand.getCards():
-                    if self.shortPrint:
-                            toreturn += f'{card.getVal()} {card.getSuit()[0]} '
-                    else:
-                        toreturn += card.getStr()
+                    toreturn += card.getStr()
                     if card != hand.getCards()[-1]:
                         toreturn += '& '
                 if len(winnershand) > 1 and not hand == winnershand[-1]:
