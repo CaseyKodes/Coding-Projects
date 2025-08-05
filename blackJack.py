@@ -314,16 +314,14 @@ def game():
     shoe = Shoe(numdecks, startingB)
     shoe.shuffle()
     enough = True
-    count = 0
     while len(shoe.deck)>2*(numplayers+1):
         dealerBlackJack = False
-        i = 1
-        shoe.deal(numplayers)
         if not fullHistory:
             os.system('cls')
         else: print()
-        print(f'{len(shoe.deck)} cards left')
-        print(f'Count is {count}.')
+        print(f'{len(shoe.deck)} cards left, before deal.')
+        i = 1
+        shoe.deal(numplayers)
         toremove = []
         for hand in shoe.players:
             hand.setDoubled(False)
@@ -582,16 +580,6 @@ def game():
             if shoe.players[player].getBalance() <= 0:
                 print(f'Player {player+1} is out of money and kicked from the table.')
                 toremove.append(player)
-            for card in shoe.players[player].getCards():
-                if card.getValnum()>=10:
-                    count -=1
-                elif card.getValnum()<=6:
-                    count +=1
-        for card in shoe.dealer.getCards():
-            if card.getValnum()>=10:
-                    count -=1
-            elif card.getValnum()<=6:
-                count +=1
 
         # reversing this list makes it so we pop from the end first
         # gets rid of index out of range errors
