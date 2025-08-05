@@ -9,6 +9,7 @@
     # we can calculate the rank of each players hand on each board
     # break ties between players if they have the same hand rank
     # have dead and or wild cards
+    # can try to find seeds with specific winning hands
 
 import random as r
 import sys
@@ -817,7 +818,7 @@ def handData():
             continue
     return sd, numboards, numplayers, numcards, numdecks
 
-def specialcards():
+def specialcards(): # getting what types of cards are dead or ild
     while True:
         try:
             dead = input('Are there any dead cards? Seperate the values with spaces. ')
@@ -851,7 +852,7 @@ def specialcards():
             continue
         return dead, wild
 
-def printdata(find):
+def printdata(find): # getting the type of print the sim should do 
     sp = False
     printStyle = ''
     while True:
@@ -900,11 +901,7 @@ def game():
     con = 'yes'
     round = 0
     changeDets = 'y'
-    sp = False
-    sd = False
-    deckLength = 52
     handsplayed = 0
-    find = False
 
     while con != 'n':
         if changeDets == 'y':
@@ -915,8 +912,8 @@ def game():
 
             while True:
                 if find:
-                    try:
-                        print('What hand are you trying to find?')
+                    try: # asking user what hand they want to find with thier seed searching
+                        print('What winning rank are you trying to find?')
                         length = len(Rankings.getHrank(sd))
                         if len(wild)==0: length-=1
                         for rank in range(length):
@@ -955,11 +952,10 @@ def game():
                 winninghanddict[level]+=1
 
             if find:
-                # we do not want to print unless we found our hand
-                if time.time()>cur+interval:
+                if time.time()>cur+interval: # shows the user the prgram is running even if it is taking a long time
                     print(f'{(time.time()-start):.4} seconds elapsed')
                     cur+=interval
-                if Rankings.getHrank(sd)[toFind-1] in org.winningLevel:
+                if Rankings.getHrank(sd)[toFind-1] in org.winningLevel: # prints the hand with the winning rank of what the user wanted 
                     print(f'\nIt took {handnum+1} hands to find the valid seed of {org.seed}')
                     simPrint(org)
                     break
@@ -973,6 +969,7 @@ def game():
                     if any(round-handsplayed == x*handsAtaTime/100 for x in oneto100):
                         print(f'{part}% of hands dealt')
                         part+=1
+
         handsplayed+=handsAtaTime
 
         changeDets = input('Do you want to change the format of the hands? Y/N ')
