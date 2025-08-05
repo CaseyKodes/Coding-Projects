@@ -11,6 +11,7 @@
     # have dead and or wild cards
 
 import random as r
+import sys
 
 class Rankings(): # basically just a place to hold these arrays which tell us the ordering of hands 
     HandValueOrder = ['High Card', 'Pair', 'Two Pair', 'Three of a kind', 'Straight', 'Flush', 'Full House', 'Four of a kind', 'Straight Flush', 'Five of a kind']
@@ -120,6 +121,7 @@ class Deck():
         self.wild = wild
         self.shortPrint = shortp
         self.short = short
+        self.seed = int()
 
         suits = ['Spades', 'Hearts', 'Clubs', 'Diamonds']
         if short: values = ['6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
@@ -136,9 +138,10 @@ class Deck():
         return(toprint)
 
     def shuffle(self): # shuffles a deck 
-        seed = r.random() # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
-        print(f'Seed of current hand is: {seed}.')
+        seed = r.randint(-sys.maxsize-1, sys.maxsize) # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
+        seed = seed # if we ever want to change the value easily
         r.seed(seed)
+        self.seed = seed
 
         shuffled = []
         while len(self.deck)>0:
@@ -798,17 +801,30 @@ def game():
     sd = False
     deckLength = 52
     handsplayed = 0
+    find = False
 
     while con != 'n':
         if changeDets == 'y':
+            # this will be where we ask the user if they want to find a seed for a certain type of hand
+            while True:
+                try: 
+                    seedfinder = input('Are you trying to search for a seed? ')
+                    if seedfinder[0] != 'y' and seedfinder[0] != 'n': raise KeyError
+                    elif seedfinder[0] == 'y': find = True; handsAtaTime = sys.maxsize
+                    elif seedfinder[0] == 'n': find = False
+                except KeyError:
+                    print("Must 'y' or 'n''.")
+                    continue
+                break
+
             while True:
                 # getting user input
                 try: 
-                    shortdeck = input('Are we playing short deck? ')
+                    shortdeck = input('Are you playing short deck? ')
                     if shortdeck[0] != 'y' and shortdeck[0] != 'n': raise KeyError
                     elif shortdeck[0] == 'y' : sd = True; deckLength=36
                     elif shortdeck[0] == 'n' : sd = False; deckLength=52
-                except:
+                except KeyError or IndexError:
                     print("Must 'y' or 'n''.")
                     continue
                 try:
@@ -841,7 +857,7 @@ def game():
                         for i in range(len(dead)):
                             if (dead[i] not in Rankings.getCrank()):
                                 raise KeyError
-                except:
+                except KeyError or IndexError:
                     print("Inproper input for dead cards.")
                     continue
                 try:
@@ -853,7 +869,7 @@ def game():
                         for i in range(len(wild)):
                             if (wild[i] not in Rankings.getCrank()):
                                 raise KeyError
-                except:
+                except KeyError or IndexError:
                     print("Inproper input for wild cards.")
                     continue
                 set1 = set(dead)
@@ -865,6 +881,24 @@ def game():
                 break
 
             while True:
+                if find:
+                    try:
+                        print('What hand are you trying to find?')
+                        length = len(Rankings.getHrank(sd))
+                        if len(wild)==0: length-=1
+                        for rank in range(length):
+                            print(f'{rank+1} -> {Rankings.getHrank(sd)[rank]}')
+                        toFind = int(input())
+                        if toFind not in range(1,length+1):
+                            print(f'Must be within 1-{length}.')
+                            raise KeyError
+                    except KeyError or IndexError:
+                        continue
+                break
+
+
+            while True:
+                if find: break # if we are looking for a seed we should go through as many hands as needed to find the seed
                 try:
                     handsAtaTime = int(input('How many hands should be dealt at a time? '))
                 except:
@@ -881,10 +915,10 @@ def game():
                             if compress[0] != 'y' and compress[0] != 'n': raise KeyError
                             elif compress[0] == 'y' : sp = True
                             elif compress[0] == 'n' : sp = False
-                        except:
+                        except KeyError or IndexError:
                             print("Must 'y' or 'n''.")
                             continue
-                except:
+                except KeyError or IndexError:
                     print('Enter S for simulation or N for no print.')
                     continue
                 break
@@ -903,21 +937,28 @@ def game():
             for hand in org.playerHands:
                 for rank in hand.getRanks():
                     tothanddict[rank]+=1
-            numrounds +=1
+            numrounds += 1
             numhands += len(org.playerHands)
 
             for level in org.winningLevel:
                 winninghanddict[level]+=1
 
-            if printStyle[0] == 's':
-                print()
-                print(f'Round {round}')
-                simPrint(org)
-            elif printStyle[0] == 'n' and handsAtaTime>100:
-                oneto100 = [i for i in range(1,101)]
-                if any(round-handsplayed == x*handsAtaTime/100 for x in oneto100):
-                    print(f'{part}% of hands dealt')
-                    part+=1
+            if find:
+                # we do not want to print unless we found our hand
+                if Rankings.getHrank(sd)[toFind-1] in org.winningLevel:
+                    print(f'\nIt took {handnum+1} hands to find the valid seed of {org.seed}')
+                    simPrint(org)
+                    break
+            else:
+                if printStyle[0] == 's':
+                    print()
+                    print(f'Round {round}')
+                    simPrint(org)
+                elif printStyle[0] == 'n' and handsAtaTime>100:
+                    oneto100 = [i for i in range(1,101)]
+                    if any(round-handsplayed == x*handsAtaTime/100 for x in oneto100):
+                        print(f'{part}% of hands dealt')
+                        part+=1
         handsplayed+=handsAtaTime
 
         changeDets = input('Do you want to change the format of the hands? Y/N ')
@@ -925,6 +966,7 @@ def game():
         con = input('Do you want to continue? Y/N ')
         con = con.lower()
 
-    printStats(tothanddict, winninghanddict)
+    if not find:
+        printStats(tothanddict, winninghanddict)
 
 game()
