@@ -5,11 +5,11 @@
     # as long as there are enough cards in the deck
         # deal hands to any number of players 
         # the hands can be any size 
-        # we can deal any number of boards of 5 cards (3 flop, 1 turn, 1 river)
+        # we can deal any number of boards of 5 cards (3 flop, 1 turn, 1 river) and 3 burn cards
     # we can calculate the rank of each players hand on each board
     # break ties between players if they have the same hand rank
     # have dead and or wild cards
-    # can try to find seeds with specific winning hands
+    # can find seeds with specific winning hands
 
 import random as r
 import sys
@@ -964,7 +964,7 @@ def game():
                     print()
                     print(f'Round {round}')
                     simPrint(org)
-                elif printStyle[0] == 'n' and handsAtaTime>100:
+                elif printStyle[0] == 'n' and handsAtaTime>1000:
                     oneto100 = [i for i in range(1,101)]
                     if any(round-handsplayed == x*handsAtaTime/100 for x in oneto100):
                         print(f'{part}% of hands dealt')
@@ -978,6 +978,7 @@ def game():
         con = con.lower()
 
     if not find:
-        printStats(tothanddict, winninghanddict)
+        printStats(tothanddict, winninghanddict) 
+
 
 game()
