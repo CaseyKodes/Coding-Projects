@@ -42,9 +42,9 @@ class Card():
     def getStr(self):
         if self.shortPrint:
             if self.getVal() == '10':
-                return f'{self.getVal()[:2]} {self.getSuit()[0]} '
+                return f'{self.getVal()[:2]}{self.getSuit()[0]} '
             else:
-                return f'{self.getVal()[0]} {self.getSuit()[0]} '
+                return f'{self.getVal()[0]}{self.getSuit()[0]} '
         else:
             return f'{self.Val} of {self.Suit} '
     def __str__(self):
@@ -882,26 +882,24 @@ def printdata(find): # getting the type of print the sim should do
         return handsAtaTime, printStyle, sp
 
 def game():
+    # default values
     numhands = 0
     numrounds = 0
-
-    # default values
     numdecks = 1
     numboards = 1
     numplayers = 6
     numcards = 2
     handsAtaTime = 1
     printStyle = 's'
-
-    tothanddict = {'High Card':0, 'Pair':0, 'Two Pair':0, 'Three of a kind':0, 'Straight':0
-                , 'Flush':0, 'Full House':0, 'Four of a kind':0, 'Straight Flush':0, 'Five of a kind':0}
-    winninghanddict = {'High Card':0, 'Pair':0, 'Two Pair':0, 'Three of a kind':0, 'Straight':0
-                    , 'Flush':0, 'Full House':0, 'Four of a kind':0, 'Straight Flush':0, 'Five of a kind':0}
-    
     con = 'yes'
     round = 0
     changeDets = 'y'
     handsplayed = 0
+    
+    tothanddict = {'High Card':0, 'Pair':0, 'Two Pair':0, 'Three of a kind':0, 'Straight':0
+                , 'Flush':0, 'Full House':0, 'Four of a kind':0, 'Straight Flush':0, 'Five of a kind':0}
+    winninghanddict = {'High Card':0, 'Pair':0, 'Two Pair':0, 'Three of a kind':0, 'Straight':0
+                    , 'Flush':0, 'Full House':0, 'Four of a kind':0, 'Straight Flush':0, 'Five of a kind':0}
 
     while con != 'n':
         if changeDets == 'y':
