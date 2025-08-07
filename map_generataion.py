@@ -9,6 +9,7 @@ seed = seed
 print(f'Seed was {seed}.')
 r.seed(seed)
 size = r.randint(15,25)
+size = 15
 
 def createGrid(): # ceates a gird of a size in 15-25 and populates it with random numbers 0-9
     grid = []
@@ -33,9 +34,9 @@ def createGrid(): # ceates a gird of a size in 15-25 and populates it with rando
             average = int(sum/9)
             averagedGrid[i][j] = average
             
-    #print(grid)
-    #print()
-    #print(averagedGrid)
+    print(grid)
+    print()
+    print(averagedGrid)
     return grid, averagedGrid
 
 def colorGrid(generated, calculated): # prints the grid in a turtle window according to the color list
@@ -63,7 +64,7 @@ def colorGrid(generated, calculated): # prints the grid in a turtle window accor
         t.setx(start)
         t.sety(start)
 
-        for row in range(len(grid)):
+        for row in range(len(grid)-1,-1,-1):
             for column in range(len(grid)):
                 t.color(colors[grid[row][column]])
                 t.pendown()
