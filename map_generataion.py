@@ -2,7 +2,12 @@
 
 import random as r
 import turtle as t
+import sys
 
+seed = r.randint(-sys.maxsize-1, sys.maxsize)
+seed = seed
+print(f'Seed was {seed}.')
+r.seed(seed)
 size = r.randint(15,25)
 
 def createGrid(): # ceates a gird of a size in 15-25 and populates it with random numbers 0-9
@@ -21,19 +26,19 @@ def createGrid(): # ceates a gird of a size in 15-25 and populates it with rando
     # they are now to random
     # want to make each point the average of the points around it
     
-    for i in range(size-1):
-        for j in range(size-1):
+    for i in range(1,size):
+        for j in range(1,size):
             sum = grid[i][j]+grid[i+1][j]+grid[i-1][j]+grid[i][j+1]+grid[i][j-1]+\
                 grid[i+1][j+1]+grid[i-1][j-1]+grid[i-1][j+1]+grid[i+1][j-1]
             average = int(sum/9)
-            averagedGrid[i+1][j+1] = average
+            averagedGrid[i][j] = average
             
     #print(grid)
     #print()
     #print(averagedGrid)
     return grid, averagedGrid
 
-def colorGrid(generated, calculated):
+def colorGrid(generated, calculated): # prints the grid in a turtle window according to the color list
     colors = ["#0A0068", "#0F4788", "#198CB9",
               "#08A765", "#2CDA43", "#BBC529", 
               "#CF8E15", "#DA570C", "#DA0C0C", 
