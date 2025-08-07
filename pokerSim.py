@@ -180,8 +180,8 @@ class Deck():
         turns = []
         rivers = []
         for i in range(numB):
-            toaddF = []
             self.burnt.append(self.deck.pop(0))
+            toaddF = []
             for card in range(3):
                 toaddF.append(self.deck.pop(0))
             flops.append(toaddF)
