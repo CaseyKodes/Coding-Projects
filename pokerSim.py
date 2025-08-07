@@ -770,14 +770,15 @@ def printStats(tot:dict, win:dict):
             percentdict[key] = (win[key]/tot[key])*100
         except ZeroDivisionError:
             print(f"Hand type -{key}- did not occur.")
-            
-    print(f'Total number of each type of hand\n{tot}')
-    print(f'Number of times each type of hand won a round\n{win}')
-    print(f'The percent of a time that the hand being this rank alone is enough to win.')
-    toprint = ''
-    for key, value in percentdict.items():
-        toprint += (f'{key}: {value:.3f} ')
-    print(toprint)
+
+    print(f'# times a hand won / # times it was dealt = Winning percent.')        
+    for key in percentdict.keys():
+        if key in ['High Card', 'Two Pair', 'Straight', 'Flush', 'Full House']:
+            print(f'{key} - \t\t{win[key]} / {tot[key]} = {percentdict[key]}')
+        elif key == 'Pair':
+            print(f'{key} - \t\t\t{win[key]} / {tot[key]} = {percentdict[key]}')
+        else:
+            print(f'{key} - \t{win[key]} / {tot[key]} = {percentdict[key]}')
 
 def seedfind():
     # this will be where we ask the user if they want to find a seed for a certain type of hand
@@ -818,7 +819,7 @@ def handData():
             continue
     return sd, numboards, numplayers, numcards, numdecks
 
-def specialcards(): # getting what types of cards are dead or ild
+def specialcards(): # getting what types of cards are dead or wild
     while True:
         try:
             dead = input('Are there any dead cards? Seperate the values with spaces. ')
@@ -895,7 +896,7 @@ def game():
     round = 0
     changeDets = 'y'
     handsplayed = 0
-    
+
     tothanddict = {'High Card':0, 'Pair':0, 'Two Pair':0, 'Three of a kind':0, 'Straight':0
                 , 'Flush':0, 'Full House':0, 'Four of a kind':0, 'Straight Flush':0, 'Five of a kind':0}
     winninghanddict = {'High Card':0, 'Pair':0, 'Two Pair':0, 'Three of a kind':0, 'Straight':0
