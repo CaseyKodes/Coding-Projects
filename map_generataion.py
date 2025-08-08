@@ -8,11 +8,11 @@ seed = r.randint(-sys.maxsize-1, sys.maxsize)
 seed = seed
 print(f'Seed was {seed}.')
 r.seed(seed)
-size = r.randint(15,25)
-scale = r.randint(0,1)
-#size = 15
+size = 35
+ratio = 20/size
 
-def createGrid(): # ceates a gird of a size in 15-25 and populates it with random numbers 0-9
+def createGrid(): 
+    # creates a grid of numbers ranging from 0-22
     grid = []
     averagedGrid = []
     for row in range(size+1):
@@ -23,60 +23,55 @@ def createGrid(): # ceates a gird of a size in 15-25 and populates it with rando
             if i==0 or j==0 or i==size or j==size:
                 grid[i][j] = 0
             else:
-                picked = [r.randint(0,9), r.randint(1,22)]
-                grid[i][j] = picked[scale]
+                grid[i][j] = r.randint(0,42)
 
     # they are now to random
     # want to make each point the average of the points around it
-    
-    for i in range(1,size):
-        for j in range(1,size):
-            sum = grid[i][j]+grid[i+1][j]+grid[i-1][j]+grid[i][j+1]+grid[i][j-1]+\
-                grid[i+1][j+1]+grid[i-1][j-1]+grid[i-1][j+1]+grid[i+1][j-1]
-            average = int(sum/9)
+    attemptedspots = [[0,0],[0,1],[0,-1],
+                      [1,0],[1,1],[1,-1],
+                      [-1,0],[-1,1],[-1,-1]]
+    for i in range(size+1):
+        for j in range(size+1):
+            sum = 0
+            todivide = 9
+            for spot in attemptedspots:
+                # useing error checking to see if a sot is not allowed
+                try:
+                    sum+=grid[i+spot[0]][j+spot[1]]
+                except Exception as e:
+                    # we are either on an edge or corner so not all the spots are valid 
+                    todivide -=1
+            average = int(sum/todivide)
             averagedGrid[i][j] = average
-            
-    print(grid)
-    print()
-    print(averagedGrid)
+
+    #print(grid)
+    #print()
+    #print(averagedGrid)
     return grid, averagedGrid
 
 def colorGrid(generated, calculated): # prints the grid in a turtle window according to the color list
-    # red   = "#ff0000"
-    # green = "#00ff00"
-    # blue  = "#0000ff"
-    # red plus green = yellow
-    # red plus blue = pruple
-    # green plus blue = light blue
-
-    morecolors = ['#000080', '#0000d5', '#0050ff', '#0088ff', '#00baff', 
-                  '#00ffff', '#00ffc0', '#00ff80', '#00ff30', '#00ff00', 
-                  '#b8ff00', '#f0f000', '#ffd000', '#ffbf00', '#ffa000',
-                  '#ff8000', '#ff5000', '#ff0000', '#ff0050', '#ff0080', 
-                  '#ff00a0', '#ff00d5', '#ff00ff']
-
-    colors = ["#0A0068", "#0F4788", "#198CB9",
-              "#08A765", "#2CDA43", "#BBC529", 
-              "#CF8E15", "#DA570C", "#DA0C0C", 
-              "#FFFFFF"]
+    morecolors = ['#000070', '#0000af', '#0000d5', '#0020ff', '#0050ff', '#0075ff', '#0088ff', '#0098ff', '#00baff', 
+                  '#00ffff', '#00ffd5', '#00ffb0', '#00ff90', '#00ff70', '#00ff50', '#00ff30', '#00ff18', '#00ff00', 
+                  '#a0ff00', '#bfff00', '#dfff00', '#fff000', '#ffe300', '#ffd000', '#ffc700', '#ffbf00', '#ffb000',
+                  '#ffa000', '#ff8000', '#ff6500', '#ff5000', '#ff2800', '#ff0000', '#ff0030', '#ff0050', '#ff0067', 
+                  '#ff0080', '#ff00b0', "#ff00c0", '#ff00d0', '#ff00e0', '#ff00f0', '#ff00ff']
     
-    colorChoice = [colors, morecolors]
-
     # for every color possible we will stamp in a turtle window the coorosponding color
     # i want to see at least a little gradient
     t.shape('square')
     t.hideturtle()
     t.speed(9001)
     screen = t.Screen()
-    screenSize = (25*size)
+    screenSize = (25*20)
     screen.setup(width=screenSize, height=screenSize)
     screen.bgcolor('black')
-
-    stampSize = 20
-    start = y = -(screenSize/2)+20
+    
+    t.shapesize(ratio,ratio,1)
+    stampSize = 20*ratio
+    start = y = -(screenSize/2)+stampSize
 
     hold = [generated, calculated]
-    #hold = [calculated]
+    hold = [calculated]
 
     for grid in hold:
         t.setx(start)
@@ -84,7 +79,7 @@ def colorGrid(generated, calculated): # prints the grid in a turtle window accor
 
         for row in range(len(grid)-1,-1,-1):
             for column in range(len(grid)):
-                t.color(colorChoice[scale][grid[row][column]])
+                t.color(morecolors[grid[row][column]])
                 t.pendown()
                 t.stamp()
                 t.penup()
