@@ -118,9 +118,9 @@ def play():
                     if placedBet!='1' and placedBet!='2' and placedBet!='3':
                         print('Not a valid selection.')
                         continue
-                    if placedBet == '1': placedBet = 'bottom'
-                    elif placedBet == '2': placedBet = 'middle'
-                    elif placedBet == '3': placedBet='top'
+                    if placedBet == '1': placedBet = 'bottom row'
+                    elif placedBet == '2': placedBet = 'middle row'
+                    elif placedBet == '3': placedBet='top row'
                     break
                 case 6:
                     SOLO = True
@@ -151,9 +151,10 @@ def play():
                                  '2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third','2nd third',
                                  '2nd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third','3rd third',
                                  '3rd third','3rd third','3rd third','3rd third','3rd third'],
-                        'row':['null','null','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top',
-                               'bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle','top','bottom','middle',
-                               'top','bottom','middle','top','bottom','middle','top','bottom','middle','top']}
+                        'row':['null','null','bottom row','middle row','top row','bottom row','middle row','top row','bottom row','middle row','top row',
+                               'bottom row','middle row','top row','bottom row','middle row','top row','bottom row','middle row','top row','bottom row',
+                               'middle row','top row','bottom row','middle row','top row','bottom row','middle row','top row','bottom row','middle row',
+                               'top row','bottom row','middle row','top row','bottom row','middle row','top row']}
         
         data = [rouletteDict['number'][result], rouletteDict['color'][result], rouletteDict['parity'][result], rouletteDict['half'][result], rouletteDict['third'][result], rouletteDict['row'][result]]
         print(f'Spin resulted with {data}')
