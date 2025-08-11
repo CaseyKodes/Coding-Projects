@@ -2,6 +2,7 @@
 
 import random as r
 import turtle as t
+import time
 import sys
 
 def createGrid(colorNum): 
@@ -42,7 +43,7 @@ def createGrid(colorNum):
                     todivide -= 1
             average = int(sum/todivide)
             averagedGrid[i][j] = average
-
+    
     #print(grid)
     #print()
     #print(averagedGrid)
@@ -104,10 +105,19 @@ def colorGrid(colorNum, generated, calculated): # prints the grid in a turtle wi
     screen.exitonclick()
 
 def show():
-    seed = r.randint(-sys.maxsize-1, sys.maxsize)
-    seed = seed
-    print(f'Seed was {seed}.')
-    r.seed(seed)
+    while True:
+        try:
+            seedfind = (input('Do you want to find a seed? (Y or N) '))
+            if seedfind[0].lower() == 'y':
+                seedfind = 1
+            elif seedfind[0].lower() == 'n':
+                seedfind = 0
+            else:
+                raise KeyError('Must be Y or N')
+        except Exception as e:
+            print(f'An error occured {e}, try again. ')
+            continue
+        break
     global size, ratio
     while True:
         try:
@@ -117,9 +127,44 @@ def show():
             print(f'An error occured {e}, try again. ')
             continue
         if colorNum>1: colorNum = 1
+        if seedfind:
+            ranges = [7,42]
+            while True:
+                searchfor = int(input(f'Enter a number to find between 0 and {ranges[colorNum]}. '))
+                if searchfor>ranges[colorNum]:
+                    print('Number is not in the range that will appear try again.')
+                    continue
+                break
         break
     ratio = 20/size
-    random, averaged = createGrid(colorNum)
-    colorGrid(colorNum, random, averaged)
+    
+    if seedfind:
+        counter = 0
+        start = time.time()
+        elapsed = 10
+        while True:
+            seed = r.randint(-sys.maxsize-1, sys.maxsize)
+            counter += 1
+            seed = seed
+            r.seed(seed)
+            random, averaged = createGrid(colorNum)
+            for row in averaged:
+                for num in row:
+                    if num == searchfor:
+                        print(f'Seed was {seed}. {counter} number of seeds checked.')
+                        colorGrid(colorNum, random, averaged)
+                        quit()
+            end = time.time()
+            if end-start > elapsed:
+                print(f'{elapsed} seconds passed, and {counter} seeds checked.')
+                elapsed += 10
+                
+    else:
+        seed = r.randint(-sys.maxsize-1, sys.maxsize)
+        seed = seed
+        print(f'Seed was {seed}.')
+        r.seed(seed)
+        random, averaged = createGrid(colorNum)
+        colorGrid(colorNum, random, averaged)
 
 show()
