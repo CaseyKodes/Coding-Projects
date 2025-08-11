@@ -4,8 +4,12 @@ import random as r
 import turtle as t
 import sys
 
-def createGrid(): 
-    # creates a grid of numbers ranging from 0-22
+def createGrid(colorNum): 
+    # creates a grid of numbers random from 0-number the user picks
+    # using those random numbers it averages them out to get a more smoot gradient
+
+    numcolors = [7,42] # number of colors in the few, many colors array respectivly 
+
     grid = []
     averagedGrid = []
     for row in range(size):
@@ -16,7 +20,7 @@ def createGrid():
             if i==0 or j==0 or i==size-1 or j==size-1:
                 grid[i][j] = 0
             else:
-                grid[i][j] = r.randint(0,42)
+                grid[i][j] = r.randint(0,numcolors[colorNum])
 
     # they are now to random
     # want to make each point the average of the points around it
@@ -44,15 +48,25 @@ def createGrid():
     #print(averagedGrid)
     return grid, averagedGrid
 
-def colorGrid(generated, calculated): # prints the grid in a turtle window according to the color list
+def colorGrid(colorNum, generated, calculated): # prints the grid in a turtle window according to the color list
+
+    # keep white at the end of both arrays as a place holder since technically the indexed only go to number of colors-1
+
+    # 42 colors total 
     morecolors = ['#000070', '#0000af', '#0000d5', '#0020ff', '#0050ff', '#0075ff',
                   '#0088ff', '#0098ff', '#00baff', '#00d5ff', '#00ffff', '#00ffd5', 
                   '#00ffb0', '#00ff80', '#00ff40', '#00ff18', '#00ff00', '#a0ff00',
                   '#bfff00', '#dfff00', '#fff000', '#ffe300', '#ffd000', '#ffc700',
                   '#ffbf00', '#ffb000', '#ffa000', '#ff8000', '#ff7000', '#ff6500',
                   '#ff5000', '#ff2800', '#ff0000', '#ff0010', '#ff0030', '#ff0050', 
-                  '#ff0067', '#ff0080', '#ff00b0', "#ff00c0", '#ff00d0', '#ff00e0', 
-                  '#ff00f0']
+                  '#ff0067', '#ff0080', '#ff00b0', "#ff00c0", '#ff00d0', '#ff00f0',
+                  '#ffffff']
+    
+    # 7 colors total 
+    fewcolors = ['#000070','#0088ff','#00ffb0','#bfff00','#ffbf00','#ff3300','#ff00c8',
+                 '#ffffff']
+
+    colorchoice = [fewcolors, morecolors]
     
     # for every color possible we will stamp in a turtle window the coorosponding color
     # i want to see at least a little gradient
@@ -77,7 +91,7 @@ def colorGrid(generated, calculated): # prints the grid in a turtle window accor
 
         for row in range(len(grid)-1,-1,-1):
             for column in range(len(grid)):
-                t.color(morecolors[grid[row][column]])
+                t.color(colorchoice[colorNum][grid[row][column]])
                 t.pendown()
                 t.stamp()
                 t.penup()
@@ -97,13 +111,15 @@ def show():
     global size, ratio
     while True:
         try:
+            colorNum = int(input('Do you want to use a few colors (0 -> 7 total), \nor a lot of colors (# > 0 -> 42 total)? '))
             size = int(input('What should the length of your square map be? '))
         except Exception as e:
             print(f'An error occured {e}, try again. ')
             continue
+        if colorNum>1: colorNum = 1
         break
     ratio = 20/size
-    random, averaged = createGrid()
-    colorGrid(random, averaged)
+    random, averaged = createGrid(colorNum)
+    colorGrid(colorNum, random, averaged)
 
 show()
