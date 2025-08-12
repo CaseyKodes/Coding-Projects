@@ -7,6 +7,7 @@
 
 import random as r
 import os
+import sys
 
 global PERCENT
 PERCENT = .13 # the percent of the board we want to be bombs
@@ -51,7 +52,21 @@ def createBoard(size:int):
     return grid
 
 def show0s(board:list, shown:list, y:int, x:int, dir=0):
-    return 1, [[x,y]] # temporary
+
+    # this version is not complete
+    # is will clear al the squares around a 0 but if there are more 0s it does not clear those also which it should
+    attemptedspots = [[0,1],[0,-1],[0,0],
+                      [1,0],[1,1],[1,-1],
+                      [-1,0],[-1,1],[-1,-1]]
+    ranges = [x for x in range(len(board))]
+
+    toreturn = []
+
+    for spot in attemptedspots:
+        if x+spot[0] in ranges and y+spot[1] in ranges and shown[y+spot[1]][x+spot[0]] == '#':
+            toreturn.append([x+spot[0],y+spot[1]])
+
+    return len(toreturn), toreturn # temporary
 
     # this function needs to return how many spots we are able to revealed
     # based on the fact the user just selected a spot with 0 bombs around it 
@@ -63,23 +78,17 @@ def show0s(board:list, shown:list, y:int, x:int, dir=0):
     # base case is when none of the spots around a 0 are 0
         # could get complicated since if we have two zeros next to each other it would just go back and forth forever 
 
-    attemptedspots = [[0,1],[0,-1],
-                      [1,0],[1,1],[1,-1],
-                      [-1,0],[-1,1],[-1,-1]]
-    ranges = [x for x in range(len(grid))]
-
+    
     up = [[1,-1],[1,0],[1,1]] # dir key = 1
     left = [[1,-1],[0,-1],[-1,-1]] # dir key = 2
     down = [[-1,-1],[-1,0],[-1,1]] # dir key = 3
     right = [[1,1],[0,1],[-1,1]] # dir key = 4
 
-    
     match dir:
         case 0:
             for spot in attemptedspots:
                 if y+spot[0] in ranges and x+spot[1] in ranges:
                     shown[y+spot[0]][x+spot[1]] = board[y+spot[0]][x+spot[1]]
-
 
     pass
 
@@ -110,6 +119,8 @@ def play(grid:list):
             print('You revealed all non-bombs you win.')
             break
 
+        print(revealed)
+
         # get what square the player wants to guess
         try:
             checkX = int(input('What is the X coord of the location you would like to guess? '))
@@ -137,19 +148,19 @@ def play(grid:list):
                 yrow += 1
             print(f'Y\n    X -\t{axis}')
             break
-        elif toshow[checkY][checkX] == '#': 
+        else: 
             # it not reveal the square if we have not checked it yet
             # if the spot we hit is a '0' we wna to clear all the '0's around it 
             # make a new funciton for that
-            if not grid[checkY][checkX]: 
+            if not grid[checkY][checkX] and toshow[checkY][checkX] == '#': 
                 found, toreveal = show0s(grid, toshow, checkY, checkX)
                 revealed += found
                 for spot in toreveal:
-                    toshow[toreveal[1]][toreveal[0]] = grid[toreveal[1]][toreveal[0]]
-            else:
+                    toshow[spot[1]][spot[0]] = str(grid[spot[1]][spot[0]])
+            elif toshow[checkY][checkX] == '#':
                 revealed += 1
                 toshow[checkY][checkX] = str(grid[checkY][checkX]) 
-            os.system('cls')
+            #os.system('cls') # do I want to clear the screen? it is kinda cool without clearing it
 
 def main():
     while True:
@@ -159,6 +170,12 @@ def main():
             print(f'An error occured {e}, try again.')
             continue
         break
+
+    seed = r.randint(-sys.maxsize-1, sys.maxsize)
+    seed = seed
+    r.seed(seed)
+    print(f'Seed was: {seed}.')
+
     board = createBoard(size)
     play(board)
 
