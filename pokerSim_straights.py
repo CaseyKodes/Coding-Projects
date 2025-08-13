@@ -570,10 +570,10 @@ def game():
                 if find:
                     try: # asking user what hand they want to find with thier seed searching
                         print('What winning rank are you trying to find?')
-                        length = len(Rankings.getHrank(sd))
+                        length = len(Rankings.getHrank())
                         if len(wild)==0: length-=1
                         for rank in range(length):
-                            print(f'{rank+1} -> {Rankings.getHrank(sd)[rank]}')
+                            print(f'{rank+1} -> {Rankings.getHrank()[rank]}')
                         toFind = int(input())
                         if toFind not in range(1,length+1):
                             print(f'Must be within 1-{length}.')
@@ -610,7 +610,7 @@ def game():
                 if time.time()>cur+interval: # shows the user the prgram is running even if it is taking a long time
                     print(f'{(time.time()-start):.4} seconds elapsed')
                     cur+=interval
-                if Rankings.getHrank(sd)[toFind-1] in org.winningLevel: # prints the hand with the winning rank of what the user wanted 
+                if Rankings.getHrank()[toFind-1] in org.winningLevel: # prints the hand with the winning rank of what the user wanted 
                     print(f'\nIt took {handnum+1} hands to find the valid seed of {org.seed}')
                     simPrint(org)
                     break
