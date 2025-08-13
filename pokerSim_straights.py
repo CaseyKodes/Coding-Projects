@@ -106,7 +106,7 @@ class Hand():
     def clearHand(self):
         self.cards.clear()
 
-    def setRank(self, rank, index):
+    def setRank(self, rank):
         self.rank = rank
     def getRank(self):
         return self.rank
@@ -135,7 +135,7 @@ class Deck():
         self.burnt = list()
         self.winnerstr = str()
         self.winningLevel = list()
-        self.hr = Rankings.getHrank(short)
+        self.hr = Rankings.getHrank()
         self.cr = Rankings.getCrank()
         self.numBorads = int()
         self.dead = dead
@@ -198,8 +198,7 @@ class Deck():
         # card then we will update their hand type if they make a better hand
         # since it is possible we did multiple baords we add a rank for each board to each hand
         for hand in self.playerHands:
-            TruestraightLength = 5 # need to chnge this to go through the range [3,8] both inclusive
-            # finding flushes 
+            # filtering hands into suit ditionary
             numwilds = 0
             suitcount = {'Spades':[], 'Hearts':[], 'Clubs':[], 'Diamonds':[]}
             for card in hand.getCards():
@@ -210,51 +209,55 @@ class Deck():
                     continue
                 suitcount[card.getSuit()].append(card)
             
-            if any(len(x) > 4-numwilds for x in suitcount.values()):
-                # if we are here we know we have a flush now we want to check if those cards are in order 
-                # looking for straight flush
-                for key, value in suitcount.items():
-                    if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                    else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                    for card in value:
-                        if card.getVal() in self.dead or card.getVal() in self.wild:
-                            continue
-                        rankcount[card.getVal()]+=1
-                    straightlist = []
-                    for i in range(2): # do this so we can have wrap around straights
-                        for value in rankcount.values():
-                            straightlist.append(value)
-                    for beg in range(len(straightlist)-TruestraightLength+1):
-                        gaps = 0
-                        for i in range(TruestraightLength):
-                            if not straightlist[beg+i]: gaps+=1
-                        if gaps<=numwilds:
-                            if self.hr.index(hand.getRank()) < self.hr.index('Straight Flush'):
-                                hand.setRank('Straight Flush')
-            # filling how many instances of a card value there are 
-            # if the value is not wild or dead
-            if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-            else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-            for card in hand.getCards():
-                if card.getVal() in self.dead or card.getVal() in self.wild:
-                    continue
-                rankcount[card.getVal()]+=1
-            # find straights
-            straightlist = []
-            for i in range(2): # do this so we can have wrap around straights
-                for value in rankcount.values():
-                    straightlist.append(value)
-            # this works by taking sections of 5 out of the array of numbers
-            # if there are 0s in that gaps in increased 
-            # we then check to see if the number of gaps is less than or equal to the number of wilds
-            # if it is we know we can fill all the gaps with wilds so we have a straight
-            for beg in range(len(straightlist)-TruestraightLength+1):
-                if self.hr.index(hand.getRank())>self.hr.index('Straight'): break
-                gaps = 0
-                for i in range(TruestraightLength):
-                    if not straightlist[beg+i]: gaps+=1
-                if gaps<=numwilds:
-                    hand.setRank('Straight')
+
+            straights = ['S 3','S 4', 'S 5', 'S 6', 'S 7', 'S 8', ]
+            straightFlushes = ['SF 3','SF 4','SF 5','SF 6','SF 7','SF 8',]
+
+            for TruestraightLength in range(3,9):# need to chnge this to go through the range [3,8] both inclusive
+                if any(len(x) > 4-numwilds for x in suitcount.values()):
+                    # if we are here we know we have a flush now we want to check if those cards are in order 
+                    # looking for straight flush
+                    for key, value in suitcount.items():
+                        if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                        else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                        for card in value:
+                            if card.getVal() in self.dead or card.getVal() in self.wild:
+                                continue
+                            rankcount[card.getVal()]+=1
+                        straightlist = []
+                        for i in range(2): # do this so we can have wrap around straights
+                            for value in rankcount.values():
+                                straightlist.append(value)
+                        for beg in range(len(straightlist)-TruestraightLength+1):
+                            gaps = 0
+                            for i in range(TruestraightLength):
+                                if not straightlist[beg+i]: gaps+=1
+                            if gaps<=numwilds:
+                                if self.hr.index(hand.getRank()) < self.hr.index(straightFlushes[TruestraightLength-3]):
+                                    hand.setRank(straightFlushes[TruestraightLength-3])
+                # filling how many instances of a card value there are 
+                # if the value is not wild or dead
+                if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                for card in hand.getCards():
+                    if card.getVal() in self.dead or card.getVal() in self.wild:
+                        continue
+                    rankcount[card.getVal()]+=1
+                # find straights
+                straightlist = []
+                for i in range(2): # do this so we can have wrap around straights
+                    for value in rankcount.values():
+                        straightlist.append(value)
+                # this works by taking sections of 5 out of the array of numbers
+                # if there are 0s in that gaps in increased 
+                # we then check to see if the number of gaps is less than or equal to the number of wilds
+                # if it is we know we can fill all the gaps with wilds so we have a straight
+                for beg in range(len(straightlist)-TruestraightLength+1):
+                    gaps = 0
+                    for i in range(TruestraightLength):
+                        if not straightlist[beg+i]: gaps+=1
+                    if gaps<=numwilds:
+                        hand.setRank(straights[TruestraightLength-3])
             
     def calcWinner(self): # from the player hand ranks find which is the best
         toreturn = f'Dead cards were {self.dead} \nWild cards were {self.wild}\n'
@@ -539,6 +542,18 @@ def printdata(find): # getting the type of print the sim should do
 
 def game():
     # default values
+    numhands = 0
+    numrounds = 0
+    numdecks = 1
+    numboards = 1
+    numplayers = 6
+    numcards = 2
+    handsAtaTime = 1
+    printStyle = 's'
+    con = 'yes'
+    round = 0
+    changeDets = 'y'
+    handsplayed = 0
 
     ranks = Rankings.getHrank()
     tothanddict = {rank:0 for rank in ranks}
@@ -584,8 +599,7 @@ def game():
 
             # keep track of all the hands that were dealt
             for hand in org.playerHands:
-                for rank in hand.getRanks():
-                    tothanddict[rank]+=1
+                tothanddict[hand.getRank()]+=1
             numrounds += 1
             numhands += len(org.playerHands)
 
