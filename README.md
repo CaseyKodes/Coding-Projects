@@ -4,7 +4,7 @@ Sometimes I code games I like to play for fun and think I should have them displ
 
 The two text files are needed to make the hang man game run since that is where they get the words to choose from depending on the difficulties. The user will need to specify in the code they download the location of those text files.
 
-Mine Sweeper, working on getting it to behave exactly like normal minesweeper, you can play it but it acts slightly differently.
+Mine Sweeper, normal game finished, thinkging about adding 3D implimentation.
 
 Black Jack, PokerSim, Map Generator, Roulette, and Battleship are done.  
 
