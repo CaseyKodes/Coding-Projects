@@ -10,7 +10,7 @@ import os
 import sys
 
 global PERCENT
-PERCENT = .13 # the percent of the board we want to be bombs
+PERCENT = .13 # the percent of the board we want to be bombs at the least
 
 def createBoard(size:int):
     # first create a 2D grid of sizeXsize
@@ -22,7 +22,7 @@ def createBoard(size:int):
     bomb = 'B'
     actualBombs = 0
 
-    # going through the grid until we have at least 16% bombs
+    # going through the grid until we have at least PERCENT% bombs
     while actualBombs < numberOfBombs:
         for i in range(len(grid)):
             for j in range(len(grid)):
@@ -49,64 +49,53 @@ def createBoard(size:int):
                 grid[i][j] = bombCount
     
     # return the grid we made
-    return grid
+    return grid, actualBombs
 
-def show0s(board:list, shown:list, y:int, x:int, dir=0):
+def show0s(board:list, shown:list, y:int, x:int):
+    # if the user selects a 0 we should automatically claer all the spcaes around it to save the suer time
+    # this also clears squars around neighboring zeros 
 
-    # this version is not complete
-    # is will clear al the squares around a 0 but if there are more 0s it does not clear those also which it should
+    # list of a 3x3 box around the space we pick
     attemptedspots = [[0,1],[0,-1],[0,0],
                       [1,0],[1,1],[1,-1],
                       [-1,0],[-1,1],[-1,-1]]
+    # making sure we do not try to access arryas that are negative or outside of the list
     ranges = [x for x in range(len(board))]
 
-    toreturn = []
+    # array of zeros we found, starts as just one but it can grow
+    zeros = [[x,y]]
+    for zero in zeros: # loop through all the zeros we know of
+        for spot in attemptedspots: # for each spot around it
+            # if the spot is actually on the grid, and has not been cleared yet clear it
+            if (zero[0]+spot[0] in ranges and zero[1]+spot[1] in ranges 
+                and shown[zero[1]+spot[1]][zero[0]+spot[0]] == '#'):
+                # if the spot is a 0 add it to the zero array so we do this same loop on the new spot
+                if not board[zero[1]+spot[1]][zero[0]+spot[0]]: 
+                    zeros.append([zero[0]+spot[0],zero[1]+spot[1]])
+                # show the value on the grid the user sees 
+                shown[zero[1]+spot[1]][zero[0]+spot[0]] = str(board[zero[1]+spot[1]][zero[0]+spot[0]])
+    return shown
 
-    for spot in attemptedspots:
-        if x+spot[0] in ranges and y+spot[1] in ranges and shown[y+spot[1]][x+spot[0]] == '#':
-            toreturn.append([x+spot[0],y+spot[1]])
-
-    return len(toreturn), toreturn # temporary
-
-    # this function needs to return how many spots we are able to revealed
-    # based on the fact the user just selected a spot with 0 bombs around it 
-
-    # this should be a recursive function 
-    # we check every square around the initial one in each of the 4 cardinal directions 
-        # this could then lead to infinite recursion if we have a 2x2 grid of zeros 
-    # if any of those are '0's we run this function on that spot also 
-    # base case is when none of the spots around a 0 are 0
-        # could get complicated since if we have two zeros next to each other it would just go back and forth forever 
-
-    
-    up = [[1,-1],[1,0],[1,1]] # dir key = 1
-    left = [[1,-1],[0,-1],[-1,-1]] # dir key = 2
-    down = [[-1,-1],[-1,0],[-1,1]] # dir key = 3
-    right = [[1,1],[0,1],[-1,1]] # dir key = 4
-
-    match dir:
-        case 0:
-            for spot in attemptedspots:
-                if y+spot[0] in ranges and x+spot[1] in ranges:
-                    shown[y+spot[0]][x+spot[1]] = board[y+spot[0]][x+spot[1]]
-
-    pass
-
-def play(grid:list):
+def play(grid:list, bombs:int):
     
     # we should keep playing until there are either
-        # 1 no more non-bomb squares to uncover
-        # 2 the player hit a bomb square 
+        # 1 no more non-bomb squares to uncover - Win
+        # 2 the player hit a bomb square - Lose
 
-    nonbombs = len(grid)*len(grid) - int(PERCENT * (len(grid)*len(grid)))
-    revealed = 0
     toshow = []
     for row in range(len(grid)):
         toshow.append(["#"]*(len(grid)))
 
     while True:
-        # print what the user has found
-        print()
+        # if the number of # on the board = number of bombs the player is done
+        hashes = 0
+        for row in toshow:
+            for char in row:
+                if char == "#":
+                    hashes+=1 
+
+        # print how many bombs are on the board and what the user has found so far
+        print(f'There are {bombs} bombs.')
         axis = [str(i) for i in range(1,len(grid)+1)]
         yrow = 0
         for row in toshow:
@@ -114,12 +103,10 @@ def play(grid:list):
             yrow += 1
         print(f'Y\n    X -\t{axis}')
 
-        # check to see if we have revealed all the squares
-        if revealed == nonbombs:
+        # check to see if we have revealed all the squares if so they win 
+        if hashes == bombs:
             print('You revealed all non-bombs you win.')
             break
-
-        print(revealed)
 
         # get what square the player wants to guess
         try:
@@ -132,11 +119,11 @@ def play(grid:list):
             continue
 
         # adjusting the spots we check to actully be the values we want to look at 
+        # since the indexes that show up on the users end are technically not what the actual indexes are
         checkX -= 1
         checkY = len(grid) - checkY
 
-        # check if that square is a bomb
-            # if it is a bomb ende game player lost
+        # if the square the user picked is a bomb the game is over adn we can reveal the whole board
         if grid[checkY][checkX] == 'B':
             print('Location was a bomb game over.')
             print('Full board was:')
@@ -148,21 +135,20 @@ def play(grid:list):
                 yrow += 1
             print(f'Y\n    X -\t{axis}')
             break
-        else: 
-            # it not reveal the square if we have not checked it yet
-            # if the spot we hit is a '0' we wna to clear all the '0's around it 
-            # make a new funciton for that
-            if not grid[checkY][checkX] and toshow[checkY][checkX] == '#': 
-                found, toreveal = show0s(grid, toshow, checkY, checkX)
-                revealed += found
-                for spot in toreveal:
-                    toshow[spot[1]][spot[0]] = str(grid[spot[1]][spot[0]])
-            elif toshow[checkY][checkX] == '#':
-                revealed += 1
+        elif toshow[checkY][checkX] == '#': 
+            # if the spot is not a bomb and the player has not checked it yet reveal the square 
+            if not grid[checkY][checkX]: 
+                # if teh square is a 0 run the clear 0s function
+                toshow = show0s(grid, toshow, checkY, checkX)
+            else:
                 toshow[checkY][checkX] = str(grid[checkY][checkX]) 
-            #os.system('cls') # do I want to clear the screen? it is kinda cool without clearing it
+            #os.system('cls') # do we want to clear the screen? it is kinda cool without clearing it
+        else:
+            # if the player has looked at this spot before tell them
+            print('Location has already been cleared.')
 
 def main():
+    # get user input for the size of the baord
     while True:
         try:
             size = int(input('What is the size of the minesweeper board? '))
@@ -170,13 +156,15 @@ def main():
             print(f'An error occured {e}, try again.')
             continue
         break
-
+    
+    # seed the map so we can test it again if something funny happens
     seed = r.randint(-sys.maxsize-1, sys.maxsize)
     seed = seed
     r.seed(seed)
     print(f'Seed was: {seed}.')
 
-    board = createBoard(size)
-    play(board)
+    # create the board and play the game
+    board, bombNum = createBoard(size)
+    play(board, bombNum)
 
 main()
