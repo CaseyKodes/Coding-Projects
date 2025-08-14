@@ -1,11 +1,5 @@
 # similar to poker sim but just for chirs's "Straights" game
 
-"""
-TODO
-how to make the code see when some has a multi type of hand
-
-"""
-
 import random as r
 import sys
 import time
@@ -78,7 +72,7 @@ class Hand():
     # they also have a rank that depends on the cards in a players hand and the cards on the board 
     # rank is a list to accomodate having multiple baords 
     # we can add and remove cards from a hand, clear a hand, get and set the rank of a hand
-    def __init__(self, cards, numboards, sp):
+    def __init__(self, cards, sp):
         self.cards = list()
         self.shortPrint = sp
         self.rank = 'High Card' # default lowest value of a hand
@@ -152,7 +146,8 @@ class Deck():
 
     def shuffle(self): # shuffles a deck 
         seed = r.randint(-sys.maxsize-1, sys.maxsize) # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
-        seed = seed # if we ever want to change the value easily
+        # right now this seed is helpful will need to change it eventuall TODO
+        seed = 5835209746644140706 # if we ever want to change the value easily 
         r.seed(seed)
         self.seed = seed
 
@@ -183,7 +178,7 @@ class Deck():
                 if player < len(self.playerHands):
                     self.playerHands[player].addCard(self.deck.pop(0))
                 else:
-                    self.playerHands.append(Hand([self.deck.pop(0)], numboards, self.shortPrint))
+                    self.playerHands.append(Hand([self.deck.pop(0)], self.shortPrint))
                  
     def calcHandRanks(self): # figure out which hand has the best hand 
         # need to look at each hand in player hands and every card on the board
@@ -193,6 +188,9 @@ class Deck():
             # filtering hands into suit ditionary
             numwilds = 0
             suitcount = {'Spades':[], 'Hearts':[], 'Clubs':[], 'Diamonds':[]}
+            if self.short: unSuitedrankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+            else: unSuitedrankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+            
             for card in hand.getCards():
                 if card.getVal() in self.dead:
                     continue
@@ -200,12 +198,16 @@ class Deck():
                     numwilds+=1
                     continue
                 suitcount[card.getSuit()].append(card)
+                unSuitedrankcount[card.getVal()]+=1 # do this at the same time as the suitcount part to save some time
             
-            straights = ['S 3','S 4', 'S 5', 'S 6', 'S 7', 'S 8', ]
-            straightFlushes = ['SF 3','SF 4','SF 5','SF 6','SF 7','SF 8',]
+            # all hands ordered by type
+            straights = ['S 3','S 4','S 5','S 6','S 7','S 8', ]
+            straightFlushes = ['SF 3','SF 4','SF 5','SF 6','SF 7','SF 8', ]
+            multiStraights = ['Multi S3+S3','Multi S4+S3','Multi S4+S4','Multi S5+S3', ]
+            multiStraightFlushes = ['Multi SF3+SF3','Multi SF4+SF3', 'Multi SF4+SF4','Multi SF5+SF3', ]
+            multieMixed = ['Multi SF3+S3','Multi S4+SF3','Multi SF4+S3','Multi S5+SF3','Multi SF4+S4','Multi SF5+S3', ]
 
             # this works for finding all normal straights and straight flushes
-            # now need to make it work for the hands that have multiple straights in them
             for TruestraightLength in range(8,2,-1): # need to chnge this to go through the range [3,8] both inclusive
 
                 if any(len(x) >= TruestraightLength-numwilds for x in suitcount.values()):
@@ -213,48 +215,81 @@ class Deck():
                     # looking for straight flush
                     for key, value in suitcount.items():
 
-                        if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                        else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                        if self.short: suitedrankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                        else: suitedrankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
                         for card in value:
                             if card.getVal() in self.dead or card.getVal() in self.wild:
                                 continue
-                            rankcount[card.getVal()]+=1
-                        straightlist = []
+                            suitedrankcount[card.getVal()]+=1
+                        suitedstraightlist = []
                         for i in range(2): # do this so we can have wrap around straights
-                            for value in rankcount.values():
-                                straightlist.append(value)
-                        for beg in range(len(straightlist)-TruestraightLength+1):
+                            for value in suitedrankcount.values():
+                                suitedstraightlist.append(value)
+                        for beg in range(len(suitedstraightlist)-TruestraightLength+1):
                             gaps = 0
                             for i in range(TruestraightLength):
-                                if not straightlist[beg+i]: gaps+=1
+                                if not suitedstraightlist[beg+i]: gaps+=1
                             if gaps<=numwilds:
                                 if self.hr.index(hand.getRank()) < self.hr.index(straightFlushes[TruestraightLength-3]):
                                     hand.setRank(straightFlushes[TruestraightLength-3])
 
-                # filling how many instances of a card value there are 
-                # if the value is not wild or dead
-                if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                for card in hand.getCards():
-                    if card.getVal() in self.dead or card.getVal() in self.wild:
-                        continue
-                    rankcount[card.getVal()]+=1
                 # find straights
-                straightlist = []
+                unsuitedstraightlist = []
                 for i in range(2): # do this so we can have wrap around straights
-                    for value in rankcount.values():
-                        straightlist.append(value)
-                # this works by taking sections of 5 out of the array of numbers
-                # if there are 0s in that gaps in increased 
+                    for value in unSuitedrankcount.values():
+                        unsuitedstraightlist.append(value)
+                # this works by taking sections  out of the array of numbers
+                # if there are 0s in that gaps variable is increased 
                 # we then check to see if the number of gaps is less than or equal to the number of wilds
                 # if it is we know we can fill all the gaps with wilds so we have a straight
-                for beg in range(len(straightlist)-TruestraightLength+1):
+                for beg in range(len(unsuitedstraightlist)-TruestraightLength+1):
                     gaps = 0
                     for i in range(TruestraightLength):
-                        if not straightlist[beg+i]: gaps+=1
+                        if not unsuitedstraightlist[beg+i]: gaps+=1
                     if gaps<=numwilds and self.hr.index(hand.getRank()) < self.hr.index(straights[TruestraightLength-3]):
                         hand.setRank(straights[TruestraightLength-3])
-            
+
+            # now need to make it work for the hands that have multiple straights in them
+            """
+                how to make it work for picking up multiple straights?
+                first need to check if it has a straight at all
+                next idea use a slider to seperaete a single 8 card hand into 2 hands (3 and 5 or 4 and 4) 
+                and we try ever combination of those 2 seperated hands we
+                can use the list that holds the cards in the hand object since that is always sorted
+                make 2 hand objects using the slices that can be made from the first hands card list
+                
+            """
+            if (self.hr.index(hand.getRank()) > self.hr.index('High Card') 
+                and self.hr.index(hand.getRank()) < self.hr.index('SF 7')):
+                # we know the hand at least has a straight 
+                # and we do not need to check if the hand is sf7 or sf8 because no multie is better than those
+                top = [3,4] # different split lengths we do not need to do 5 because spliting 8 into a group of 3 makes a group of 5
+                hand1Cards = []
+                hand2Cards = []
+                for handLength in top:
+                    if handLength == 3: runs = 4
+                    else: runs = 8
+                    for begining in range(runs):
+                        # first clear them
+                        hand1Cards.clear()
+                        hand2Cards.clear()
+                        hand1Cards = hand.getCards()[begining:handLength+begining+1]
+                        hand2Cards = hand.getCards()[0:begining] + hand.getCards()[handLength+begining+1:]
+                        if runs > 4:
+                            while len(hand2Cards)>3:
+                                toadd = hand2Cards.pop(0)
+                                hand1Cards.append(toadd)
+                        split1 = Hand(hand1Cards, True)
+                        split2 = Hand(hand2Cards, True)
+                        print(split1)
+                        print(split2)
+
+                        # now we need to calculate the rank of split1 and split2
+                        # once we have the ranks for both parts we can see if each has a rank, 
+                        # if both hands have a rank then we need to set rank to the appropriate multi
+
+                            
+                                    
     def calcWinner(self): # from the player hand ranks find which is the best
         toreturn = f'Dead cards were {self.dead} \nWild cards were {self.wild}\n'
         winnershand = []
@@ -277,23 +312,23 @@ class Deck():
                 elif (self.hr.index(playersHand.getRank()) 
                     == self.hr.index(winnerslevel)):
                     # we have equal rank hands
-                    # we  then need to call the tiebreak function 
+                    # we then need to call the tiebreak function 
                     winnershand.append(playersHand)
                     
                     # do not do this yet since we do  not have the tiebreak function implimented for this game
-                    #winnershand = self.tiebreak(winnershand, winnerslevel, boardIndex)
+                    # winnershand = self.tiebreak(winnershand, winnerslevel, boardIndex)
 
-            toreturn += f'Winning hand had rank of {winnerslevel} '
-            toreturn += '\nWith a hand of: \n'
-            for hand in winnershand:
-                for card in hand.getCards():
-                    toreturn += card.getStr()
-                    if card != hand.getCards()[-1]:
-                        toreturn += '& '
-                if len(winnershand) > 1 and not hand == winnershand[-1]:
-                    toreturn += '\nand '
-            toreturn += '\n'
-            self.winningLevel.append(winnerslevel)
+        toreturn += f'Winning hand had rank of {winnerslevel} '
+        toreturn += '\nWith a hand of: \n'
+        for hand in winnershand:
+            for card in hand.getCards():
+                toreturn += card.getStr()
+                if card != hand.getCards()[-1]:
+                    toreturn += '& '
+            if len(winnershand) > 1 and not hand == winnershand[-1]:
+                toreturn += '\nand '
+        toreturn += '\n'
+        self.winningLevel.append(winnerslevel)
         self.winnerstr=toreturn
 
     # if i just want to see how often each type of hand happens we do not need to run this  
@@ -464,7 +499,7 @@ def simPrint(deck:Deck): # printing the results as if we are just simulating the
 def printStats(tot:dict, win:dict):
     ranks = Rankings.getHrank()
     percentdict = {rank:0 for rank in ranks}
-
+    
     print('\nStats of all hands played.')
     for key in percentdict.keys():
         try:
@@ -564,7 +599,7 @@ def game():
         if changeDets == 'y':
 
             find, handsAtaTime, sp, = seedfind()
-            sd, numboards, numplayers, numcards, numdecks = False, 0, 6, 8, 1
+            sd, numboards, numplayers, numcards, numdecks = False, 0, 1, 8, 1
             dead, wild = specialcards()
 
             while True:
@@ -596,10 +631,12 @@ def game():
             org.deal(numplayers,numcards,numboards)
             org.calcHandRanks()
             org.calcWinner()
+            ranks = []
 
             # keep track of all the hands that were dealt
             for hand in org.playerHands:
                 tothanddict[hand.getRank()]+=1
+                ranks.append(hand.getRank())
 
             for level in org.winningLevel:
                 winninghanddict[level]+=1
@@ -608,7 +645,7 @@ def game():
                 if time.time()>cur+interval: # shows the user the prgram is running even if it is taking a long time
                     print(f'{(time.time()-start):.4} seconds elapsed')
                     cur+=interval
-                if Rankings.getHrank()[toFind-1] in org.winningLevel: # prints the hand with the winning rank of what the user wanted 
+                if Rankings.getHrank()[toFind-1] in ranks: # prints the hand with the winning rank of what the user wanted 
                     print(f'\nIt took {handnum+1} hands to find the valid seed of {org.seed}')
                     simPrint(org)
                     break
@@ -632,6 +669,7 @@ def game():
         con = con.lower()
 
     if not find:
+        return # temporary TODO
         printStats(tothanddict, winninghanddict) 
 
 
