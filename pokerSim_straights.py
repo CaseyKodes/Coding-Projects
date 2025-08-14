@@ -1,11 +1,8 @@
 # similar to poker sim but just for chirs's "Straights" game
 
-
 """
-
-QUESTIONS THAT NEED TO BE ANSWERED
-    - does having 2 starights, 5 and 3 or 4 and 4 or 3 and 4, mean you have a better hand that just 1 straight?
-        ANSWER - yes players hand should be worht more if they have 2 straights how much more not sure
+TODO
+how to make the code see when some has a multi type of hand
 
 """
 
@@ -14,9 +11,6 @@ import sys
 import time
 
 class Rankings(): 
-    # all lone straights are one hand type, 
-    # multie straihgts are another hand type
-    
     # to keep as reference 
     AllHandsReference = [
         'High Card', 
@@ -28,17 +22,15 @@ class Rankings():
         'S 8', 'SF 8',
         ]
 
+    # order subject to change
     chatsRanking = [
         'High Card',
-        'S 3','S 4','S 5','Multi S3+S3','SF 3','S 6','Multi S4+S3',
-        'S 7','SF 4','Multi S4+S4','Multi S5+S3','Multi SF3+S3',
-        'Multi S4+SF3','Multi SF4+S3','S 8','SF 5','Multi SF3+SF3',
+        'S 3','S 4','S 5','Multi S3+S3','S 6','SF 3','Multi S4+S3',
+        'SF 4','S 7','Multi S4+S4','Multi S5+S3','Multi SF3+S3',
+        'Multi S4+SF3','Multi SF4+S3','SF 5','S 8','Multi SF3+SF3',
         'Multi S5+SF3','SF 6','Multi SF4+S4','Multi SF4+SF3',
         'Multi SF5+S3','Multi SF4+SF4','Multi SF5+SF3','SF 7','SF 8',
     ]
-
-    # number of ways to make the normal straight flushes of varying lengths
-    # XF where X <=8 28+4*(8-X) number of ways in a standard deck there are to make a straight flush of X length
 
     CardValueOrder = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
@@ -209,15 +201,18 @@ class Deck():
                     continue
                 suitcount[card.getSuit()].append(card)
             
-
             straights = ['S 3','S 4', 'S 5', 'S 6', 'S 7', 'S 8', ]
             straightFlushes = ['SF 3','SF 4','SF 5','SF 6','SF 7','SF 8',]
 
-            for TruestraightLength in range(3,9):# need to chnge this to go through the range [3,8] both inclusive
-                if any(len(x) > 4-numwilds for x in suitcount.values()):
-                    # if we are here we know we have a flush now we want to check if those cards are in order 
+            # this works for finding all normal straights and straight flushes
+            # now need to make it work for the hands that have multiple straights in them
+            for TruestraightLength in range(8,2,-1): # need to chnge this to go through the range [3,8] both inclusive
+
+                if any(len(x) >= TruestraightLength-numwilds for x in suitcount.values()):
+                    # if we are here we know we have a flush of the length needed
                     # looking for straight flush
                     for key, value in suitcount.items():
+
                         if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
                         else: rankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
                         for card in value:
@@ -235,6 +230,7 @@ class Deck():
                             if gaps<=numwilds:
                                 if self.hr.index(hand.getRank()) < self.hr.index(straightFlushes[TruestraightLength-3]):
                                     hand.setRank(straightFlushes[TruestraightLength-3])
+
                 # filling how many instances of a card value there are 
                 # if the value is not wild or dead
                 if self.short: rankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
@@ -256,7 +252,7 @@ class Deck():
                     gaps = 0
                     for i in range(TruestraightLength):
                         if not straightlist[beg+i]: gaps+=1
-                    if gaps<=numwilds:
+                    if gaps<=numwilds and self.hr.index(hand.getRank()) < self.hr.index(straights[TruestraightLength-3]):
                         hand.setRank(straights[TruestraightLength-3])
             
     def calcWinner(self): # from the player hand ranks find which is the best
@@ -476,6 +472,12 @@ def printStats(tot:dict, win:dict):
         except ZeroDivisionError:
             print(f"Hand type -{key}- did not occur.")
 
+    total = sum(win.values())
+    print()
+    for key in tot.keys():
+        print(f'Hand type {key} showed up {(tot[key]/total):.5} percent of the time.')
+    print()
+    
     print(f'# times a hand won / # times it was dealt = Winning percent.')        
     for key in percentdict.keys():
         print(f'Hand type {key} percent of times it won {percentdict[key]}.')
@@ -528,28 +530,27 @@ def specialcards(): # getting what types of cards are dead or wild
         return dead, wild
 
 def printdata(find): # getting the type of print the sim should do 
-    sp = False
+    sp = True
     printStyle = ''
     while True:
-        if find: return sys.maxsize, printStyle, True # if we are looking for a seed we should go through as many hands as needed to find the seed
+        if find: return sys.maxsize, printStyle, sp # if we are looking for a seed we should go through as many hands as needed to find the seed
         try:
             handsAtaTime = int(input('How many hands should be dealt at a time? '))
         except:
             print("Must input a number.")
             continue
-        break
-    return handsAtaTime, 's', True
+        try: 
+            printStyle = input('How should the hand be shown? As a simulation or no print? ')
+            printStyle = printStyle.lower()
+            if printStyle[0] != 's' and printStyle[0] != 'n':
+                raise KeyError
+        except:
+            print('Enter S for simulation or N for no print.')
+            continue
+        return handsAtaTime, printStyle, sp
 
 def game():
     # default values
-    numhands = 0
-    numrounds = 0
-    numdecks = 1
-    numboards = 1
-    numplayers = 6
-    numcards = 2
-    handsAtaTime = 1
-    printStyle = 's'
     con = 'yes'
     round = 0
     changeDets = 'y'
@@ -571,7 +572,6 @@ def game():
                     try: # asking user what hand they want to find with thier seed searching
                         print('What winning rank are you trying to find?')
                         length = len(Rankings.getHrank())
-                        if len(wild)==0: length-=1
                         for rank in range(length):
                             print(f'{rank+1} -> {Rankings.getHrank()[rank]}')
                         toFind = int(input())
@@ -600,8 +600,6 @@ def game():
             # keep track of all the hands that were dealt
             for hand in org.playerHands:
                 tothanddict[hand.getRank()]+=1
-            numrounds += 1
-            numhands += len(org.playerHands)
 
             for level in org.winningLevel:
                 winninghanddict[level]+=1
@@ -629,6 +627,7 @@ def game():
 
         changeDets = input('Do you want to change the format of the hands? Y/N ')
         changeDets = changeDets.lower()
+    
         con = input('Do you want to continue? Y/N ')
         con = con.lower()
 
