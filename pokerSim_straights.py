@@ -8,9 +8,9 @@ class Rankings():
     # to keep as reference 
     AllHandsReference = [
         'High Card', 
-        'S 3', 'SF 3', 'Multi S3+S3', 'Multi SF3+S3', 'Multi SF3+SF3',
-        'S 4', 'SF 4', 'Multi S4+S3', 'Multi S4+S4', 'Multi S4+SF3', 'Multi SF4+S3', 'Multi SF4+S4', 'Multi SF4+SF3', 'Multi SF4+SF4',
-        'S 5', 'SF 5', 'Multi S5+S3', 'Multi S5+SF3', 'Multi SF5+S3', 'Multi SF5+SF3',
+        'S 3', 'SF 3', 'Multi S 3 + S 3', 'Multi SF 3 + S 3', 'Multi SF 3 + SF 3',
+        'S 4', 'SF 4', 'Multi S 4 + S 3', 'Multi S 4 + S 4', 'Multi S 4 + SF 3', 'Multi SF 4 + S 3', 'Multi SF 4 + S 4', 'Multi SF 4 + SF 3', 'Multi S F4 + SF 4',
+        'S 5', 'SF 5', 'Multi S 5 + S 3', 'Multi S 5 + SF 3', 'Multi SF 5 + S 3', 'Multi SF 5 + SF 3',
         'S 6', 'SF 6',
         'S 7', 'SF 7',
         'S 8', 'SF 8',
@@ -19,12 +19,19 @@ class Rankings():
     # order subject to change
     chatsRanking = [
         'High Card',
-        'S 3','S 4','S 5','Multi S3+S3','S 6','SF 3','Multi S4+S3',
-        'SF 4','S 7','Multi S4+S4','Multi S5+S3','Multi SF3+S3',
-        'Multi S4+SF3','Multi SF4+S3','SF 5','S 8','Multi SF3+SF3',
-        'Multi S5+SF3','SF 6','Multi SF4+S4','Multi SF4+SF3',
-        'Multi SF5+S3','Multi SF4+SF4','Multi SF5+SF3','SF 7','SF 8',
+        'S 3','S 4','S 5','Multi S 3 + S 3','S 6','SF 3','Multi S 4 + S 3',
+        'SF 4','S 7','Multi S 4 + S 4','Multi S 5 + S 3','Multi SF 3 + S 3',
+        'Multi S 4 + SF 3','Multi SF 4 + S 3','SF 5','S 8','Multi SF 3 + SF 3',
+        'Multi S 5 + SF 3','SF 6','Multi SF 4 + S 4','Multi SF 4 + SF 3',
+        'Multi SF 5 + S 3','Multi SF 4 + SF 4','Multi SF 5 + SF 3','SF 7','SF 8',
     ]
+
+    # all hands ordered by type
+    straights = ['S 3','S 4','S 5','S 6','S 7','S 8', ]
+    straightFlushes = ['SF 3','SF 4','SF 5','SF 6','SF 7','SF 8', ]
+    multiStraights = ['Multi S3+S3','Multi S4+S3','Multi S4+S4','Multi S5+S3', ]
+    multiStraightFlushes = ['Multi SF3+SF3','Multi SF4+SF3', 'Multi SF4+SF4','Multi SF5+SF3', ]
+    multieMixed = ['Multi SF3+S3','Multi S4+SF3','Multi SF4+S3','Multi S5+SF3','Multi SF4+S4','Multi SF5+S3', ]
 
     CardValueOrder = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
@@ -147,7 +154,7 @@ class Deck():
     def shuffle(self): # shuffles a deck 
         seed = r.randint(-sys.maxsize-1, sys.maxsize) # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
         # right now this seed is helpful will need to change it eventuall TODO
-        seed = 5835209746644140706 # if we ever want to change the value easily 
+        seed = seed # if we ever want to change the value easily 
         r.seed(seed)
         self.seed = seed
 
@@ -179,75 +186,69 @@ class Deck():
                     self.playerHands[player].addCard(self.deck.pop(0))
                 else:
                     self.playerHands.append(Hand([self.deck.pop(0)], self.shortPrint))
-                 
+
+    def soloRank(self, hand:Hand):
+        # filtering hands into suit ditionary
+        numwilds = 0
+        suitcount = {'Spades':[], 'Hearts':[], 'Clubs':[], 'Diamonds':[]}
+        if self.short: unSuitedrankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+        else: unSuitedrankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+        
+        for card in hand.getCards():
+            if card.getVal() in self.dead:
+                continue
+            if card.getVal() in self.wild:
+                numwilds+=1
+                continue
+            suitcount[card.getSuit()].append(card)
+            unSuitedrankcount[card.getVal()]+=1 # do this at the same time as the suitcount part to save some time
+        
+        for TruestraightLength in range(len(hand.getCards()),2,-1): # need to chnge this to go through the range [3,8] both inclusive
+            if any(len(x) >= TruestraightLength-numwilds for x in suitcount.values()):
+                # if we are here we know we have a flush of the length needed
+                # looking for straight flush
+                for key, value in suitcount.items():
+                    if self.short: suitedrankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                    else: suitedrankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
+                    for card in value:
+                        if card.getVal() in self.dead or card.getVal() in self.wild:
+                            continue
+                        suitedrankcount[card.getVal()]+=1
+                    suitedstraightlist = []
+                    for i in range(2): # do this so we can have wrap around straights
+                        for value in suitedrankcount.values():
+                            suitedstraightlist.append(value)
+                    for beg in range(len(suitedstraightlist)-TruestraightLength+1):
+                        gaps = 0
+                        for i in range(TruestraightLength):
+                            if not suitedstraightlist[beg+i]: gaps+=1
+                        if gaps<=numwilds:
+                            if self.hr.index(hand.getRank()) < self.hr.index(Rankings.straightFlushes[TruestraightLength-3]):
+                                hand.setRank(Rankings.straightFlushes[TruestraightLength-3])
+            # find straights
+            unsuitedstraightlist = []
+            for i in range(2): # do this so we can have wrap around straights
+                for value in unSuitedrankcount.values():
+                    unsuitedstraightlist.append(value)
+            # this works by taking sections  out of the array of numbers
+            # if there are 0s in that gaps variable is increased 
+            # we then check to see if the number of gaps is less than or equal to the number of wilds
+            # if it is we know we can fill all the gaps with wilds so we have a straight
+            for beg in range(len(unsuitedstraightlist)-TruestraightLength+1):
+                gaps = 0
+                for i in range(TruestraightLength):
+                    if not unsuitedstraightlist[beg+i]: gaps+=1
+                if gaps<=numwilds and self.hr.index(hand.getRank()) < self.hr.index(Rankings.straights[TruestraightLength-3]):
+                    hand.setRank(Rankings.straights[TruestraightLength-3])
+
     def calcHandRanks(self): # figure out which hand has the best hand 
         # need to look at each hand in player hands and every card on the board
         # card then we will update their hand type if they make a better hand
         # since it is possible we did multiple baords we add a rank for each board to each hand
         for hand in self.playerHands:
-            # filtering hands into suit ditionary
-            numwilds = 0
-            suitcount = {'Spades':[], 'Hearts':[], 'Clubs':[], 'Diamonds':[]}
-            if self.short: unSuitedrankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-            else: unSuitedrankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-            
-            for card in hand.getCards():
-                if card.getVal() in self.dead:
-                    continue
-                if card.getVal() in self.wild:
-                    numwilds+=1
-                    continue
-                suitcount[card.getSuit()].append(card)
-                unSuitedrankcount[card.getVal()]+=1 # do this at the same time as the suitcount part to save some time
-            
-            # all hands ordered by type
-            straights = ['S 3','S 4','S 5','S 6','S 7','S 8', ]
-            straightFlushes = ['SF 3','SF 4','SF 5','SF 6','SF 7','SF 8', ]
-            multiStraights = ['Multi S3+S3','Multi S4+S3','Multi S4+S4','Multi S5+S3', ]
-            multiStraightFlushes = ['Multi SF3+SF3','Multi SF4+SF3', 'Multi SF4+SF4','Multi SF5+SF3', ]
-            multieMixed = ['Multi SF3+S3','Multi S4+SF3','Multi SF4+S3','Multi S5+SF3','Multi SF4+S4','Multi SF5+S3', ]
 
             # this works for finding all normal straights and straight flushes
-            for TruestraightLength in range(8,2,-1): # need to chnge this to go through the range [3,8] both inclusive
-
-                if any(len(x) >= TruestraightLength-numwilds for x in suitcount.values()):
-                    # if we are here we know we have a flush of the length needed
-                    # looking for straight flush
-                    for key, value in suitcount.items():
-
-                        if self.short: suitedrankcount = {'6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                        else: suitedrankcount = {'2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'Jack':0, 'Queen':0, 'King':0, 'Ace':0}
-                        for card in value:
-                            if card.getVal() in self.dead or card.getVal() in self.wild:
-                                continue
-                            suitedrankcount[card.getVal()]+=1
-                        suitedstraightlist = []
-                        for i in range(2): # do this so we can have wrap around straights
-                            for value in suitedrankcount.values():
-                                suitedstraightlist.append(value)
-                        for beg in range(len(suitedstraightlist)-TruestraightLength+1):
-                            gaps = 0
-                            for i in range(TruestraightLength):
-                                if not suitedstraightlist[beg+i]: gaps+=1
-                            if gaps<=numwilds:
-                                if self.hr.index(hand.getRank()) < self.hr.index(straightFlushes[TruestraightLength-3]):
-                                    hand.setRank(straightFlushes[TruestraightLength-3])
-
-                # find straights
-                unsuitedstraightlist = []
-                for i in range(2): # do this so we can have wrap around straights
-                    for value in unSuitedrankcount.values():
-                        unsuitedstraightlist.append(value)
-                # this works by taking sections  out of the array of numbers
-                # if there are 0s in that gaps variable is increased 
-                # we then check to see if the number of gaps is less than or equal to the number of wilds
-                # if it is we know we can fill all the gaps with wilds so we have a straight
-                for beg in range(len(unsuitedstraightlist)-TruestraightLength+1):
-                    gaps = 0
-                    for i in range(TruestraightLength):
-                        if not unsuitedstraightlist[beg+i]: gaps+=1
-                    if gaps<=numwilds and self.hr.index(hand.getRank()) < self.hr.index(straights[TruestraightLength-3]):
-                        hand.setRank(straights[TruestraightLength-3])
+            self.soloRank(hand)
 
             # now need to make it work for the hands that have multiple straights in them
             """
@@ -281,15 +282,129 @@ class Deck():
                                 hand1Cards.append(toadd)
                         split1 = Hand(hand1Cards, True)
                         split2 = Hand(hand2Cards, True)
-                        print(split1)
-                        print(split2)
+                        
+                        # we now have rankings for both parts of the split
+                        self.soloRank(split1)
+                        self.soloRank(split2)
 
-                        # now we need to calculate the rank of split1 and split2
-                        # once we have the ranks for both parts we can see if each has a rank, 
-                        # if both hands have a rank then we need to set rank to the appropriate multi
+                        if (self.hr.index(split1.getRank()) > self.hr.index('High Card') 
+                            and self.hr.index(split2.getRank()) > self.hr.index('High Card')):
+                            # if both parts of the split have a rank better than high card we need to assign it the appropriate multi 
+                            # and see if that multi rank beats the rank of the full hand currently
+                            ranks = [split1.getRank(), split2.getRank()]
+                            ranks.sort()
+                            rankstring = str(ranks[0])+" "+str(ranks[1])
 
-                            
-                                    
+                            match split1.getRank():
+                                case 'S 3':
+                                    match split2.getRank():
+                                        case 'S 3': 
+                                            toset = 'Multi S 3 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'S 4':
+                                            toset = 'Multi S 4 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'S 5':
+                                            toset = 'Multi S 5 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 3':
+                                            toset = 'Multi SF 3 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 4':
+                                            toset = 'Multi SF 4 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 5':
+                                            toset = 'Multi SF 5 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                case 'S 4':
+                                    match split2.getRank():
+                                        case 'S 3': 
+                                            toset = 'Multi S 4 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'S 4':
+                                            toset = 'Multi S 4 + S 4'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 3':
+                                            toset = 'Multi S 4 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 4':
+                                            toset = 'Multi SF 4 + S 4'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                case 'S 5':
+                                    match split2.getRank():
+                                        case 'S 3': 
+                                            toset = 'Multi S 5 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 3':
+                                            toset = 'Multi S 5 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                case 'SF 3':
+                                    match split2.getRank():
+                                        case 'S 3': 
+                                            toset = 'Multi SF 3 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'S 4':
+                                            toset = 'Multi SF 4 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'S 5':
+                                            toset = 'Multi SF 5 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 3':
+                                            toset = 'Multi SF 3 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 4':
+                                            toset = 'Multi SF 4 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 5':
+                                            toset = 'Multi SF 5 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                case 'SF 4':
+                                    match split2.getRank():
+                                        case 'S 3': 
+                                            toset = 'Multi SF 4 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'S 4':
+                                            toset = 'Multi SF 4 + S 4'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 3':
+                                            toset = 'Multi SF 4 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 4':
+                                            toset = 'Multi SF 4 + SF 4'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                case 'SF 5':
+                                    match split2.getRank():
+                                        case 'S 3': 
+                                            toset = 'Multi SF 5 + S 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+                                        case 'SF 3':
+                                            toset = 'Multi SF 5 + SF 3'
+                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                                hand.setRank(toset)
+
     def calcWinner(self): # from the player hand ranks find which is the best
         toreturn = f'Dead cards were {self.dead} \nWild cards were {self.wild}\n'
         winnershand = []
@@ -599,7 +714,7 @@ def game():
         if changeDets == 'y':
 
             find, handsAtaTime, sp, = seedfind()
-            sd, numboards, numplayers, numcards, numdecks = False, 0, 1, 8, 1
+            sd, numboards, numplayers, numcards, numdecks = False, 0, 6, 8, 1
             dead, wild = specialcards()
 
             while True:
@@ -669,7 +784,7 @@ def game():
         con = con.lower()
 
     if not find:
-        return # temporary TODO
+        #return # temporary TODO
         printStats(tothanddict, winninghanddict) 
 
 
