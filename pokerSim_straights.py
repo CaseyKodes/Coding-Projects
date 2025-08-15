@@ -274,6 +274,14 @@ class Deck():
                         # first clear them
                         hand1Cards.clear()
                         hand2Cards.clear()
+
+                        # the only problem with this way of splitting the hands is that now the hands similar to 
+                        # 3 3 4 4 5 5 6 6 will not be counted as multi since the program does not see it like 
+                        # 3 4 5 6 3 4 5 6 it sees them as the first option
+                        # 8 choose 4 = 8!/((8-4)!*4!) = 70
+                        # 8 choose 3 = 8!/((8-3)!*3!) = 56
+                        # total = 126
+
                         hand1Cards = hand.getCards()[begining:handLength+begining+1]
                         hand2Cards = hand.getCards()[0:begining] + hand.getCards()[handLength+begining+1:]
                         if runs > 4:
