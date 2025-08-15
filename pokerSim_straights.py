@@ -266,11 +266,11 @@ class Deck():
                         8 choose 4 = 8!/((8-4)!*4!) = 70
                         8 choose 3 = 8!/((8-3)!*3!) = 56
                         total = 126
-                        
+
                     problem with hand type rankings
                         a SF 3 is better than a S 5 
                         but if there is a hand which has a section that can make a S 5 and inside of that have a SF 3 
-                        and with the other three cards havd a SF 3 thern the hand will be classified as a sf 3 sf 3 
+                        and with the other three cards havd a SF 3 then the hand will be classified as a sf 3 sf 3 
                         even though a s 5 sf 3 is better 
 
                         need to somehow be able to hold all the hand types a split of a hand can make 
