@@ -152,8 +152,8 @@ class Deck():
         return(toprint)
 
     def shuffle(self): # shuffles a deck 
-        seed = r.randint(-sys.maxsize-1, sys.maxsize) # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
-        # right now this seed is helpful will need to change it eventuall TODO
+        seed = r.randint(-sys.maxsize-1, sys.maxsize) 
+        # seeding the random and printing the seed so if there is weird behavior we can rerun the same seed
         seed = seed # if we ever want to change the value easily 
         r.seed(seed)
         self.seed = seed
@@ -188,6 +188,8 @@ class Deck():
                     self.playerHands.append(Hand([self.deck.pop(0)], self.shortPrint))
 
     def soloRank(self, hand:Hand):
+        # this will not set the type of hand but return a dictionary of the best hands this hand can make
+
         # filtering hands into suit ditionary
         numwilds = 0
         suitcount = {'Spades':[], 'Hearts':[], 'Clubs':[], 'Diamonds':[]}
@@ -241,16 +243,14 @@ class Deck():
                 if gaps<=numwilds and self.hr.index(hand.getRank()) < self.hr.index(Rankings.straights[TruestraightLength-3]):
                     hand.setRank(Rankings.straights[TruestraightLength-3])
 
-    def calcHandRanks(self): # figure out which hand has the best hand 
-        # need to look at each hand in player hands and every card on the board
-        # card then we will update their hand type if they make a better hand
-        # since it is possible we did multiple baords we add a rank for each board to each hand
+    def calcHandRanks(self): # figuring out the rank for each hand
         for hand in self.playerHands:
 
-            # this works for finding all normal straights and straight flushes
+            #find the rank of a single hand
             self.soloRank(hand)
 
             # now need to make it work for the hands that have multiple straights in them
+
             """
                 how to make it work for picking up multiple straights?
                 first need to check if it has a straight at all
@@ -258,8 +258,27 @@ class Deck():
                 and we try ever combination of those 2 seperated hands we
                 can use the list that holds the cards in the hand object since that is always sorted
                 make 2 hand objects using the slices that can be made from the first hands card list
+
+                CURRENT ISSUIES
+                    problem with this way of splitting the hands is that now the hands similar to 
+                        3 3 4 4 5 5 6 6 will not be counted as multi since the program does not see it like 
+                        3 4 5 6 3 4 5 6 it sees them as the first option
+                        8 choose 4 = 8!/((8-4)!*4!) = 70
+                        8 choose 3 = 8!/((8-3)!*3!) = 56
+                        total = 126
+                        
+                    problem with hand type rankings
+                        a SF 3 is better than a S 5 
+                        but if there is a hand which has a section that can make a S 5 and inside of that have a SF 3 
+                        and with the other three cards havd a SF 3 thern the hand will be classified as a sf 3 sf 3 
+                        even though a s 5 sf 3 is better 
+
+                        need to somehow be able to hold all the hand types a split of a hand can make 
+                        keep the best straight and the best straight flush
+                        then combine it with the other split to see which use of cards would be the best  
                 
             """
+
             if (self.hr.index(hand.getRank()) > self.hr.index('High Card') 
                 and self.hr.index(hand.getRank()) < self.hr.index('SF 7')):
                 # we know the hand at least has a straight 
@@ -275,13 +294,6 @@ class Deck():
                         hand1Cards.clear()
                         hand2Cards.clear()
 
-                        # the only problem with this way of splitting the hands is that now the hands similar to 
-                        # 3 3 4 4 5 5 6 6 will not be counted as multi since the program does not see it like 
-                        # 3 4 5 6 3 4 5 6 it sees them as the first option
-                        # 8 choose 4 = 8!/((8-4)!*4!) = 70
-                        # 8 choose 3 = 8!/((8-3)!*3!) = 56
-                        # total = 126
-
                         hand1Cards = hand.getCards()[begining:handLength+begining+1]
                         hand2Cards = hand.getCards()[0:begining] + hand.getCards()[handLength+begining+1:]
                         if runs > 4:
@@ -295,6 +307,10 @@ class Deck():
                         self.soloRank(split1)
                         self.soloRank(split2)
 
+                        # seeing the sorted order
+                        ranks = ['S 3', 'S 4', 'S 5', 'SF 3', 'SF 4', 'SF 5'] 
+                        # this is the sorted order of the small hands per python
+
                         if (self.hr.index(split1.getRank()) > self.hr.index('High Card') 
                             and self.hr.index(split2.getRank()) > self.hr.index('High Card')):
                             # if both parts of the split have a rank better than high card we need to assign it the appropriate multi 
@@ -303,116 +319,83 @@ class Deck():
                             ranks.sort()
                             rankstring = str(ranks[0])+" "+str(ranks[1])
 
-                            match split1.getRank():
+                            beforematch = hand.getRank()
+
+                            match ranks[0]:
                                 case 'S 3':
-                                    match split2.getRank():
+                                    match ranks[1]:
                                         case 'S 3': 
                                             toset = 'Multi S 3 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'S 4':
                                             toset = 'Multi S 4 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'S 5':
                                             toset = 'Multi S 5 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 3':
                                             toset = 'Multi SF 3 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 4':
                                             toset = 'Multi SF 4 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 5':
                                             toset = 'Multi SF 5 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                 case 'S 4':
-                                    match split2.getRank():
-                                        case 'S 3': 
-                                            toset = 'Multi S 4 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
+                                    match ranks[1]:
                                         case 'S 4':
                                             toset = 'Multi S 4 + S 4'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 3':
                                             toset = 'Multi S 4 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 4':
                                             toset = 'Multi SF 4 + S 4'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                 case 'S 5':
-                                    match split2.getRank():
-                                        case 'S 3': 
-                                            toset = 'Multi S 5 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
+                                    match ranks[1]:
                                         case 'SF 3':
                                             toset = 'Multi S 5 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                 case 'SF 3':
-                                    match split2.getRank():
-                                        case 'S 3': 
-                                            toset = 'Multi SF 3 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
-                                        case 'S 4':
-                                            toset = 'Multi SF 4 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
-                                        case 'S 5':
-                                            toset = 'Multi SF 5 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
+                                    match ranks[1]:
                                         case 'SF 3':
                                             toset = 'Multi SF 3 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 4':
                                             toset = 'Multi SF 4 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                         case 'SF 5':
                                             toset = 'Multi SF 5 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
                                 case 'SF 4':
-                                    match split2.getRank():
-                                        case 'S 3': 
-                                            toset = 'Multi SF 4 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
-                                        case 'S 4':
-                                            toset = 'Multi SF 4 + S 4'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
-                                        case 'SF 3':
-                                            toset = 'Multi SF 4 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
+                                    match ranks[1]:
                                         case 'SF 4':
                                             toset = 'Multi SF 4 + SF 4'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
+                                            if(self.hr.index(hand.getRank()) < self.hr.index(toset)):
                                                 hand.setRank(toset)
-                                case 'SF 5':
-                                    match split2.getRank():
-                                        case 'S 3': 
-                                            toset = 'Multi SF 5 + S 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
-                                        case 'SF 3':
-                                            toset = 'Multi SF 5 + SF 3'
-                                            if(self.hr.index(hand.getRank()) > self.hr.index(toset)):
-                                                hand.setRank(toset)
-
+                            
+                            # prints for testing
+                            #print()
+                            #print(f'{split1}, \t{split1.getRank()}')
+                            #print(f'{split2}, \t{split2.getRank()}')
+                            #print(beforematch)
+                            #print(hand.getRank())
+    
     def calcWinner(self): # from the player hand ranks find which is the best
         toreturn = f'Dead cards were {self.dead} \nWild cards were {self.wild}\n'
         winnershand = []
@@ -622,7 +605,8 @@ def simPrint(deck:Deck): # printing the results as if we are just simulating the
 def printStats(tot:dict, win:dict):
     ranks = Rankings.getHrank()
     percentdict = {rank:0 for rank in ranks}
-    
+    total = sum(win.values())
+
     print('\nStats of all hands played.')
     for key in percentdict.keys():
         try:
@@ -630,7 +614,6 @@ def printStats(tot:dict, win:dict):
         except ZeroDivisionError:
             print(f"Hand type -{key}- did not occur.")
 
-    total = sum(win.values())
     print()
     for key in tot.keys():
         print(f'Hand type {key} showed up {(tot[key]/total):.5} percent of the time.')
@@ -717,12 +700,12 @@ def game():
     ranks = Rankings.getHrank()
     tothanddict = {rank:0 for rank in ranks}
     winninghanddict = {rank:0 for rank in ranks}
-
+    
     while con != 'n':
         if changeDets == 'y':
 
             find, handsAtaTime, sp, = seedfind()
-            sd, numboards, numplayers, numcards, numdecks = False, 0, 6, 8, 1
+            sd, numboards, numplayers, numcards, numdecks = False, 0, 1, 8, 1
             dead, wild = specialcards()
 
             while True:
@@ -794,6 +777,5 @@ def game():
     if not find:
         #return # temporary TODO
         printStats(tothanddict, winninghanddict) 
-
 
 game()
