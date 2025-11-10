@@ -274,6 +274,7 @@ def game():
     startingB = 1000
     betsize = 10
     fullHistory = False
+    
     while True:
         # getting user input
         try: 
@@ -293,6 +294,9 @@ def game():
             continue
         if (1+numplayers)*2<=numdecks*52:
             break
+
+    maxB = [startingB for player in range(numplayers)]
+
     while True:
         try:
             history = input("Do you want to see the full history of hands played? ('Y' or 'N')" )
@@ -573,7 +577,13 @@ def game():
                     print(f'Player {player+1} busts. With a value of {shoe.players[player].getValue()}. Updated balance = {shoe.players[player].getBalance():.2f}')
                     continue
                     
-        
+        # calculating all players max balance
+            # does not really work for multiple players right now
+            # TODO
+        for player in range(len(shoe.players)):
+            if (maxB[player] < shoe.players[player].getBalance()):
+                maxB[player] = shoe.players[player].getBalance()
+
         # calculating the count and deciding who is out of money
         toremove = []
         for player in range(len(shoe.players)):
@@ -590,16 +600,23 @@ def game():
         numplayers-=len(toremove)
         if numplayers==0:
             print('No more players at the table.')
-            quit()
+            return(maxB)
         while True:
             if enough:
                 exit = input('Enter any character to play the next hand. \nEnter 0 to exit. ')
-                if exit != '0': break
-                else: print('Thanks for playing.'); quit()
+                if exit != '0': 
+                    break
+                else: 
+                    print('Thanks for playing.')
+                    return(maxB)
             else:
                 print('Shoe is empty thank you for playing.')
-                quit()
+                return(maxB)
                 
     print('Not enough cards for the number of players specified thank you for playing.')
+    return(maxB)
 
-game()
+
+if __name__ == '__main__':
+    finalsMaxB = game()
+    print(f'The Maximum each player had was as follows: \n{finalsMaxB}')
