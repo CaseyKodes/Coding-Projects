@@ -270,7 +270,7 @@ class Shoe():
 
 def game():
     numdecks = 1
-    numplayers = 4
+    numplayers = 1
     startingB = 1000
     betsize = 10
     fullHistory = False
@@ -283,19 +283,20 @@ def game():
             print("Must input a number.")
             continue
         try:
-            numplayers = int(input('How many players should there be? '))
+            pass
+            #numplayers = int(input('How many players should there be? '))
         except:
             print("Must input a number.")
             continue
         try: 
-            startingB = float(input("What is the starting balance for players? "))
+            startingB = float(input("What is the starting balance for the player? "))
         except:
             print("Must input a number.")
             continue
         if (1+numplayers)*2<=numdecks*52:
             break
 
-    maxB = [startingB for player in range(numplayers)]
+    maxB = startingB
 
     while True:
         try:
@@ -580,9 +581,8 @@ def game():
         # calculating all players max balance
             # does not really work for multiple players right now
             # TODO
-        for player in range(len(shoe.players)):
-            if (maxB[player] < shoe.players[player].getBalance()):
-                maxB[player] = shoe.players[player].getBalance()
+        if (maxB < shoe.players[player].getBalance()):
+            maxB = shoe.players[player].getBalance()
 
         # calculating the count and deciding who is out of money
         toremove = []
@@ -619,4 +619,5 @@ def game():
 
 if __name__ == '__main__':
     finalsMaxB = game()
-    print(f'The Maximum each player had was as follows: \n{finalsMaxB}')
+    print(f'The Maximum the player had was: {finalsMaxB}')
+    e = input("Press enter to exit. ")

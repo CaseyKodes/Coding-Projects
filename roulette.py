@@ -157,7 +157,7 @@ def play():
                                'top row','bottom row','middle row','top row','bottom row','middle row','top row']}
         
         data = [rouletteDict['number'][result], rouletteDict['color'][result], rouletteDict['parity'][result], rouletteDict['half'][result], rouletteDict['third'][result], rouletteDict['row'][result]]
-        print(f'Spin resulted with {data}')
+        print(f'Spin resulted with: \n{data}')
         if RB: # check color
             if placedBet == str(data[1]):
                 print('Bet won')

@@ -530,10 +530,10 @@ def printStats(tot:dict, win:dict):
         except ZeroDivisionError:
             print(f"Hand type -{key}- did not occur.")
 
-    total = sum(win.values())
+    total = sum(tot.values())
     print()
     for key in tot.keys():
-        print(f'Hand type {key} showed up {(tot[key]/total):.5} percent of the time.')
+        print(f'Hand type {key} showed up in {(tot[key]/total)*100:.5} percent of hands.')
     print()
     
     print(f'# times a hand won / # times it was dealt = Winning percent.')        

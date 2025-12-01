@@ -222,7 +222,6 @@ def game(numQ, mode):
             values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace']
             tens = [10, 'Jack', 'Queen', 'King',]
 
-            
             match mode:
                 # case 1 is dealt with by skipping this section of code
 
@@ -281,6 +280,10 @@ def game(numQ, mode):
 
         # get the right play
         correctPlay = get_correct_play(s.players[0], s.dealer.getCards()[0], catagory)
+
+        # TODO
+        # this is where we actuall get user input
+        # if we want to make this into somewhat of an actauyl UI it would start here
 
         # get their reaction 
         choice = ''
@@ -343,6 +346,6 @@ if __name__ == '__main__':
         percent = game(numQ, mode)
         print(f'{percent} / {numQ} Correct Answers, {(percent*100)/numQ:.2f}%')
     
-        toExit = input('Do you want to keep playing? ("y" or "n")' )
+        toExit = input('Do you want to keep playing? ("y" or "n") ')
         if len(toExit) > 0 and toExit[0].lower() == 'n':
             keepPlaying = False

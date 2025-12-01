@@ -1,6 +1,6 @@
 # mine sweeper
 
-# going to use a default of 16% of the board is bombs
+# going to use a default of 13% of the board is bombs
 # players can choose any board size
 # where the bombs are are randomly generated
 # board prints as a table 
