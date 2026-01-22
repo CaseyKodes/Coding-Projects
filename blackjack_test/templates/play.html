@@ -1,0 +1,37 @@
+<title>Playing</title>
+
+<h2>Dealer Cards</h2>
+{% for c in dealer_cards %}
+<img src="{{ url_for('static', filename='pixel_art/deck/FINAL_BORDERED/' + c + '.png') }}"
+     width="{{w}}"
+     height="{{h}}"
+     alt="{{c}}">
+{% endfor %}
+
+<h2>Player Cards</h2>
+{% for p in player_cards %}
+    {% for c in p %}
+    <img src="{{ url_for('static', filename='pixel_art/deck/FINAL_BORDERED/' + c + '.png') }}"
+         width="{{w}}"
+         height="{{h}}"
+         alt="{{c}}">
+    {% endfor %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <form action="/action_result" method="post">
+                        {% for a in actions %}
+                        <button type="submit" name="action" value={{a}}>{{a}}</button>
+                        {% endfor %}
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endfor %}

@@ -1,0 +1,32 @@
+<title>Initial</title>
+<h3>
+    You are playing a flask application made by Casey Provitera <br>
+    This applications tests players on their ability to make the <br>
+    correct decision in Blackjack situations.<br>
+</h3>
+
+<!-- ask user their balance -->
+<table>
+    <thead>
+        <tr>
+            <th scope="col">Choose a Game mode</th>
+            <h4>
+                1 = All hand types<br>
+                2 = Only hard totals<br>
+                3 = Only soft totals<br>
+                4 = Only pairs<br>
+            </h4>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <form action="/chosen_Mode" method="post">
+                        {% for a in gameModes %}
+                        <button type="submit" name="action" value={{a}}>{{a}}</button>
+                        {% endfor %}
+                </form>
+            </td>
+        </tr>
+    </tbody>
+</table>
